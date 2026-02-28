@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Session Helper — Guide d'installation</title>
+  <style>
+    :root {
+      --bg:        #141414;
+      --card:      #1c1c1c;
+      --card2:     #242424;
+      --border:    #2a2a2a;
+      --text:      #e0e0e0;
+      --muted:     #666;
+      --blue:      #3b82f6;
+      --green:     #22c55e;
+      --green-bg:  #0b2115;
+      --warn:      #f59e0b;
+      --radius:    12px;
+      --font:      'Segoe UI', Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 15px;
+      line-height: 1.7;
+      padding: 40px 20px 80px;
+    }
+
+    .page { max-width: 820px; margin: 0 auto; }
+
+    /* ── En-tête ── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      margin-bottom: 36px;
+    }
+    header img { width: 52px; height: 52px; border-radius: 10px; }
+    header h1 { font-size: 22px; font-weight: 700; }
+    header p  { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .badge {
+      display: inline-block;
+      background: var(--green-bg);
+      color: var(--green);
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    /* ── Sections ── */
+    h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 36px 0 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--blue);
+      margin: 24px 0 10px;
+    }
+
+    p { margin-bottom: 12px; color: #ccc; }
+
+    /* ── Étapes numérotées ── */
+    .steps { display: flex; flex-direction: column; gap: 24px; }
+    .step {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 26px;
+    }
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .step-num {
+      background: var(--blue);
+      color: #fff;
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .step-title { font-weight: 700; font-size: 16px; }
+    .step img {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-top: 14px;
+    }
+
+    /* ── Code ── */
+    code {
+      background: #0e0e0e;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 2px 8px;
+      font-family: 'Consolas', monospace;
+      font-size: 13px;
+      color: var(--blue);
+    }
+
+    /* ── Info / Warning boxes ── */
+    .box {
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+    .box-green {
+      background: var(--green-bg);
+      border-left: 3px solid var(--green);
+      color: #a7f3c0;
+    }
+    .box-warn {
+      background: #1f1508;
+      border-left: 3px solid var(--warn);
+      color: #fcd99a;
+    }
+    .box-blue {
+      background: #0d1f3c;
+      border-left: 3px solid var(--blue);
+      color: #93c5fd;
+    }
+
+    /* ── Tableau ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+    th {
+      background: var(--card2);
+      color: var(--muted);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #1e1e1e;
+      color: #ccc;
+    }
+    tr:last-child td { border-bottom: none; }
+    td:first-child { color: var(--text); font-weight: 500; }
+
+    /* ── Liste ── */
+    ul, ol { padding-left: 22px; color: #ccc; margin-bottom: 12px; }
+    li { margin-bottom: 6px; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 60px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- En-tête -->
+  <header>
+    <img src="../Claude-Win-Monitor_ICO.png" alt="Logo Claude-Win-Monitor">
+    <div>
+      <h1>Claude Session Helper</h1>
+      <p>Guide d'installation &amp; mise à jour de la sessionKey</p>
+      <span class="badge">● Extension Chrome / Edge</span>
+    </div>
+  </header>
+
+  <!-- Principe -->
+  <h2>Principe</h2>
+  <p>
+    <strong>Claude-Win-Monitor</strong> a besoin d'une clé de session (<code>sessionKey</code>)
+    pour interroger l'API de Claude et afficher vos statistiques d'usage.
+  </p>
+  <p>
+    Cette clé est un cookie géré automatiquement par votre navigateur.
+    L'extension <strong>Claude Session Helper</strong> la récupère et la transmet
+    à l'application — sans aucune intervention de votre part.
+  </p>
+  <div class="box box-blue">
+    Prérequis : navigateur <strong>Chrome</strong> ou <strong>Edge</strong>,
+    être connecté sur <strong>claude.ai</strong>, application
+    <strong>Claude-Win-Monitor</strong> installée.
+  </div>
+
+  <!-- Installation -->
+  <h2>Installation de l'extension (une seule fois)</h2>
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-num">1</div>
+        <div class="step-title">Ouvrir le gestionnaire d'extensions</div>
+      </div>
+      <p>
+        Dans Chrome ou Edge, cliquez sur le menu <strong>⋮</strong> (trois points)
+        en haut à droite, puis <strong>Extensions → Gérer les extensions</strong>.<br>
+        Ou tapez directement : <code>chrome://extensions</code>
+      </p>
+      <img src="extension01.png" alt="Ouvrir le gestionnaire d'extensions">
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-num">2</div>
+        <div class="step-title">Activer le mode développeur</div>
+      </div>
+      <p>
+        En haut à droite du gestionnaire d'extensions, activez le bouton
+        <strong>Mode développeur</strong>, puis cliquez sur
+        <strong>Charger l'extension non empaquetée</strong>.
+      </p>
+      <img src="extension02.png" alt="Activer le mode développeur">
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-num">3</div>
+        <div class="step-title">Charger le dossier extension</div>
+      </div>
+      <p>
+        Naviguez jusqu'au dossier <code>extension/</code> du projet
+        Claude-Win-Monitor et sélectionnez-le.<br>
+        L'extension <strong>Claude Session Helper</strong> apparaît dans la liste.
+      </p>
+      <img src="extension03.png" alt="Extension installée">
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-num">4</div>
+        <div class="step-title">Vérification</div>
+      </div>
+      <ol>
+        <li>Lancez <strong>Claude-Win-Monitor</strong></li>
+        <li>En quelques secondes, l'app reçoit automatiquement la clé de session</li>
+        <li>La fenêtre <strong>Paramètres</strong> se ferme d'elle-même si elle s'était ouverte</li>
+        <li>Vos statistiques s'affichent</li>
+      </ol>
+      <div class="box box-green">
+        L'extension peut ensuite être <strong>désactivée</strong>. La clé est sauvegardée
+        localement. L'app fonctionnera normalement jusqu'au prochain changement de session.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Mise à jour -->
+  <h2>Mise à jour de la sessionKey</h2>
+  <p>La <code>sessionKey</code> change dans deux cas :</p>
+  <ul>
+    <li>Déconnexion de claude.ai puis reconnexion</li>
+    <li>Expiration naturelle de la session</li>
+  </ul>
+
+  <h3>Méthode automatique (recommandée)</h3>
+  <ol>
+    <li><strong>Réactiver</strong> l'extension dans <code>chrome://extensions</code></li>
+    <li>La clé est envoyée automatiquement à l'app en quelques secondes</li>
+    <li>Désactiver l'extension à nouveau</li>
+  </ol>
+
+  <h3>Méthode manuelle (fallback)</h3>
+  <ol>
+    <li>Ouvrir <strong>claude.ai</strong> dans le navigateur</li>
+    <li>Appuyer sur <strong>F12</strong> → onglet <strong>Application</strong></li>
+    <li>Aller dans <strong>Cookies → https://claude.ai</strong></li>
+    <li>Copier la valeur du cookie <code>sessionKey</code> (<code>sk-ant-sid02-...</code>)</li>
+    <li>Dans l'app, cliquer sur <strong>⚙ Paramètres</strong></li>
+    <li>Coller la valeur et cliquer sur <strong>Sauvegarder &amp; Relancer</strong></li>
+  </ol>
+
+  <!-- Déclencheurs -->
+  <h2>Déclencheurs automatiques de l'extension</h2>
+  <table>
+    <tr><th>Événement</th><th>Action</th></tr>
+    <tr><td>Démarrage du navigateur</td><td>Envoi de la sessionKey</td></tr>
+    <tr><td>Installation / réactivation</td><td>Envoi immédiat</td></tr>
+    <tr><td>Chargement d'un onglet claude.ai</td><td>Envoi</td></tr>
+    <tr><td>Renouvellement du cookie par Claude</td><td>Envoi automatique</td></tr>
+    <tr><td>Démarrage de l'app (détecté en ≤ 10s)</td><td>Envoi si app absente au départ</td></tr>
+  </table>
+  <div class="box box-blue">
+    Si l'app n'est pas encore lancée, l'extension réessaie jusqu'à
+    <strong>10 fois</strong> toutes les <strong>5 secondes</strong>.
+  </div>
+
+  <!-- Sécurité -->
+  <h2>Sécurité</h2>
+  <ul>
+    <li>La <code>sessionKey</code> est transmise <strong>uniquement en local</strong> (<code>localhost:27182</code>)</li>
+    <li>Stockée dans <code>claude_monitor_config.json</code> sur votre machine</li>
+    <li>L'extension ne communique avec <strong>aucun serveur externe</strong></li>
+    <li>Permissions : <code>cookies</code> (lecture claude.ai) + <code>tabs</code> (détection page)</li>
+  </ul>
+
+  <!-- Dépannage -->
+  <h2>Dépannage</h2>
+  <table>
+    <tr><th>Symptôme</th><th>Cause probable</th><th>Solution</th></tr>
+    <tr>
+      <td>App reste vide après lancement</td>
+      <td>Extension désactivée</td>
+      <td>Réactiver l'extension</td>
+    </tr>
+    <tr>
+      <td>Fenêtre Paramètres reste ouverte</td>
+      <td>Extension pas encore envoyé</td>
+      <td>Attendre 10s ou désactiver/réactiver</td>
+    </tr>
+    <tr>
+      <td>Erreur 403 dans l'app</td>
+      <td>SessionKey expirée</td>
+      <td>Réactiver l'extension ou méthode manuelle</td>
+    </tr>
+    <tr>
+      <td>Extension ne trouve pas de cookie</td>
+      <td>Non connecté sur claude.ai</td>
+      <td>Se connecter puis réactiver l'extension</td>
+    </tr>
+  </table>
+
+  <footer>
+    Claude-Win-Monitor &nbsp;|&nbsp; 🅻🅶 @ IA Mastery &nbsp;|&nbsp; 28/02/2026
+  </footer>
+
+</div>
+</body>
+</html>
