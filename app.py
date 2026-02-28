@@ -264,42 +264,86 @@ class _BaseDialog(ctk.CTkToplevel):
 
 class SettingsDialog(_BaseDialog):
     def __init__(self, parent, current_key):
-        super().__init__(parent, "⚙   Paramètres", 460, 265)
+        super().__init__(parent, "⚙   Paramètres", 460, 370)
         self._parent_app = parent
 
         ctk.CTkLabel(
             self.content, text="Clé de Session",
             font=("Segoe UI", 14, "bold"), anchor="w"
-        ).pack(anchor="w")
-        ctk.CTkLabel(
-            self.content,
-            text="F12 › Application › Cookies › https://claude.ai",
-            font=("Segoe UI", 12), text_color="#555", anchor="w"
-        ).pack(anchor="w", pady=(3, 4))
-
-        ctk.CTkButton(
-            self.content,
-            text="↗  Ouvrir claude.ai/settings/usage",
-            command=lambda: webbrowser.open("https://claude.ai/settings/usage"),
-            fg_color="transparent", hover_color="#1a2a3a",
-            text_color=COLOR_BLUE, font=("Segoe UI", 11),
-            anchor="w", height=24, corner_radius=4
         ).pack(anchor="w", pady=(0, 10))
 
+        # ── Méthode automatique ──────────────────────────────────
+        m1 = ctk.CTkFrame(self.content, fg_color="#0d1f10", corner_radius=8)
+        m1.pack(fill="x", pady=(0, 8))
+        inner1 = ctk.CTkFrame(m1, fg_color="transparent")
+        inner1.pack(fill="x", padx=12, pady=10)
+
+        ctk.CTkLabel(
+            inner1, text="①  Méthode automatique  (recommandée)",
+            font=("Segoe UI", 11, "bold"), text_color=COLOR_GREEN, anchor="w"
+        ).pack(anchor="w")
+        ctk.CTkLabel(
+            inner1,
+            text="Activez l'extension  \"Claude Session Helper\"  dans votre navigateur.",
+            font=("Segoe UI", 11), text_color="#7aad7a", anchor="w", wraplength=380
+        ).pack(anchor="w", pady=(3, 4))
+        ctk.CTkButton(
+            inner1, text="↗  Ouvrir le guide d'installation",
+            command=self._open_guide,
+            fg_color="transparent", hover_color="#0b2115",
+            text_color=COLOR_GREEN, font=("Segoe UI", 11),
+            anchor="w", height=22, corner_radius=4
+        ).pack(anchor="w")
+
+        # ── Séparateur ───────────────────────────────────────────
+        ctk.CTkFrame(self.content, height=1, fg_color="#2a2a2a",
+                     corner_radius=0).pack(fill="x", pady=(0, 8))
+
+        # ── Méthode manuelle ─────────────────────────────────────
+        m2 = ctk.CTkFrame(self.content, fg_color="#0d1a2a", corner_radius=8)
+        m2.pack(fill="x", pady=(0, 10))
+        inner2 = ctk.CTkFrame(m2, fg_color="transparent")
+        inner2.pack(fill="x", padx=12, pady=10)
+
+        ctk.CTkLabel(
+            inner2, text="②  Méthode manuelle",
+            font=("Segoe UI", 11, "bold"), text_color=COLOR_BLUE, anchor="w"
+        ).pack(anchor="w")
+        ctk.CTkLabel(
+            inner2,
+            text="F12  ›  Application  ›  Cookies  ›  https://claude.ai  ›  sessionKey",
+            font=("Segoe UI", 10), text_color="#5588aa", anchor="w"
+        ).pack(anchor="w", pady=(3, 4))
+        ctk.CTkButton(
+            inner2, text="↗  Ouvrir claude.ai",
+            command=lambda: webbrowser.open("https://claude.ai"),
+            fg_color="transparent", hover_color="#0d1f3c",
+            text_color=COLOR_BLUE, font=("Segoe UI", 11),
+            anchor="w", height=22, corner_radius=4
+        ).pack(anchor="w")
+
         self.key_entry = ctk.CTkEntry(
-            self.content, height=38,
+            self.content, height=36,
             placeholder_text="sk-ant-sid01-...",
             font=("Segoe UI", 11)
         )
         self.key_entry.insert(0, current_key)
-        self.key_entry.pack(fill="x")
+        self.key_entry.pack(fill="x", pady=(0, 8))
 
         ctk.CTkButton(
             self.content, text="Sauvegarder & Relancer",
             command=self.save_and_close,
-            fg_color=COLOR_BLUE, height=38,
+            fg_color=COLOR_BLUE, height=36,
             font=("Segoe UI", 12, "bold")
-        ).pack(fill="x", pady=(12, 0))
+        ).pack(fill="x")
+
+    def _open_guide(self):
+        guide = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             "guide_extension", "Guide d'installation.html")
+        if os.path.exists(guide):
+            webbrowser.open(f"file:///{guide.replace(os.sep, '/')}")
+        else:
+            webbrowser.open("https://claude.ai")
 
     def save_and_close(self):
         new_key = self.key_entry.get().strip()
