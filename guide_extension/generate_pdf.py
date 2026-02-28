@@ -28,7 +28,7 @@ with sync_playwright() as p:
         path=str(PDF_OUT),
         format="A4",
         print_background=True,   # indispensable pour les fonds colorés
-        margin={"top": "15mm", "bottom": "15mm", "left": "15mm", "right": "15mm"}
+        margin={"top": "0mm", "bottom": "0mm", "left": "0mm", "right": "0mm"}
     )
 
     browser.close()

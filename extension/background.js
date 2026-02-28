@@ -3,7 +3,7 @@
 // Extension navigateur (Chrome / Edge — Manifest V3)
 // Transmission automatique de la sessionKey à l'application
 //
-// Auteur  : LG @ IA Mastery
+// Auteur  : 🅻🅶 @ IA Mastery
 // Date    : 28/02/2026
 // ================================================================
 //
