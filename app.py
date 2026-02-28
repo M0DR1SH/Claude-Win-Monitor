@@ -347,7 +347,7 @@ class SettingsDialog(_BaseDialog):
         inner1.pack(fill="x", padx=14, pady=12)
 
         ctk.CTkLabel(
-            inner1, text="①  Méthode automatique  (recommandée)",
+            inner1, text="1.  Méthode automatique  (recommandée)",
             font=("Segoe UI", 12, "bold"), text_color=COLOR_SAFE, anchor="w"
         ).pack(anchor="w")
         ctk.CTkLabel(
@@ -374,7 +374,7 @@ class SettingsDialog(_BaseDialog):
         inner2.pack(fill="x", padx=14, pady=12)
 
         ctk.CTkLabel(
-            inner2, text="②  Méthode manuelle",
+            inner2, text="2.  Méthode manuelle",
             font=("Segoe UI", 12, "bold"), text_color=COLOR_BLUE, anchor="w"
         ).pack(anchor="w")
         ctk.CTkLabel(
@@ -405,6 +405,19 @@ class SettingsDialog(_BaseDialog):
             fg_color=COLOR_BLUE, height=38,
             font=("Segoe UI", 13, "bold")
         ).pack(fill="x")
+
+        # Ajustement automatique de la hauteur après rendu complet
+        self.after(50, self._auto_fit)
+
+    def _auto_fit(self):
+        """Ajuste la hauteur de la fenêtre à son contenu réel et recentre."""
+        self.update_idletasks()
+        h  = self.winfo_reqheight() + 4   # +4px de marge
+        sw = self.winfo_screenwidth()
+        sh = self.winfo_screenheight()
+        x  = max(0, (sw - 460) // 2)
+        y  = max(0, (sh - h)  // 2)
+        self.geometry(f"460x{h}+{x}+{y}")
 
     def _open_guide(self):
         """Ouvre le guide HTML local dans le navigateur par défaut.
