@@ -280,7 +280,7 @@ class SettingsDialog(_BaseDialog):
 
         ctk.CTkLabel(
             inner1, text="①  Méthode automatique  (recommandée)",
-            font=("Segoe UI", 11, "bold"), text_color=COLOR_GREEN, anchor="w"
+            font=("Segoe UI", 11, "bold"), text_color=COLOR_SAFE, anchor="w"
         ).pack(anchor="w")
         ctk.CTkLabel(
             inner1,
@@ -291,7 +291,7 @@ class SettingsDialog(_BaseDialog):
             inner1, text="↗  Ouvrir le guide d'installation",
             command=self._open_guide,
             fg_color="transparent", hover_color="#0b2115",
-            text_color=COLOR_GREEN, font=("Segoe UI", 11),
+            text_color=COLOR_SAFE, font=("Segoe UI", 11),
             anchor="w", height=22, corner_radius=4
         ).pack(anchor="w")
 
