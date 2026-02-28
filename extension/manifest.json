@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Claude Session Helper",
+  "version": "1.0",
+  "description": "Transmet automatiquement la sessionKey de Claude à Claude-Win-Monitor",
+  "permissions": ["cookies", "tabs"],
+  "host_permissions": [
+    "https://claude.ai/*",
+    "http://localhost:27182/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}
