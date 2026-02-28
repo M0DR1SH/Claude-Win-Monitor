@@ -1,14 +1,8 @@
 {
-  "_comment_1": "================================================================",
-  "_comment_2": "CLAUDE-WIN-MONITOR — Claude Session Helper v1.0",
-  "_comment_3": "Extension navigateur Chrome/Edge — Manifest V3",
-  "_comment_4": "Auteur : LG @ IA Mastery | Date : 28/02/2026",
-  "_comment_5": "================================================================",
-
   "manifest_version": 3,
   "name": "Claude Session Helper",
   "version": "1.0",
-  "description": "Transmet automatiquement la sessionKey de Claude à Claude-Win-Monitor (LG @ IA Mastery)",
+  "description": "Claude-Win-Monitor — Transmission automatique de la sessionKey. LG @ IA Mastery (28/02/2026)",
 
   "permissions": [
     "cookies",
