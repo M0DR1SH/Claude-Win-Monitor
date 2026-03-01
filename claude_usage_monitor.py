@@ -237,7 +237,7 @@ class _BaseDialog(ctk.CTkToplevel):
 
         ctk.CTkLabel(
             tb, text=title_text,
-            font=("Segoe UI", 12, "bold"), text_color="#bbb"
+            font=("Segoe UI", 12), text_color="#bbb"
         ).pack(side="left", padx=14)
 
         ctk.CTkButton(
