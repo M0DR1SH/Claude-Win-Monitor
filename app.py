@@ -196,35 +196,6 @@ class ConfigManager:
 
 # ── ICÔNE DE STATUT ──────────────────────────────────────────────────────────
 
-class StatusIcon(tk.Canvas):
-    """Cercle coloré dessiné sur canvas : affiche ✓ si ratio < 85 %, sinon ! (alerte)."""
-
-    def __init__(self, master, size=20, bg_color=COLOR_CARD, **kwargs):
-        super().__init__(master, width=size, height=size,
-                         bg=bg_color, highlightthickness=0, **kwargs)
-        self.size = size
-        self.draw(0.0, COLOR_SAFE)
-
-    def draw(self, ratio, color):
-        """Redessine l'icône avec la couleur et le symbole correspondant au ratio."""
-        self.delete("all")
-        s  = self.size
-        lw = max(2, s // 11)
-        self.create_oval(1, 1, s - 1, s - 1, fill=color, outline="")
-        if ratio < 0.85:
-            # Symbole coche ✓
-            pts = [s * 0.24, s * 0.52, s * 0.44, s * 0.72, s * 0.76, s * 0.28]
-            self.create_line(*pts, fill="white", width=lw,
-                             capstyle="round", joinstyle="round")
-        else:
-            # Symbole ! (point d'exclamation)
-            cx = s / 2
-            self.create_line(cx, s * 0.22, cx, s * 0.60,
-                             fill="white", width=lw, capstyle="round")
-            r  = max(1.5, s // 12)
-            cy = s * 0.76
-            self.create_oval(cx - r, cy - r, cx + r, cy + r,
-                             fill="white", outline="")
 
 
 # ── FENÊTRES MODALES (base commune) ──────────────────────────────────────────
@@ -543,8 +514,13 @@ class _SessionKeyHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         if self.path == '/session-key':
-            length  = int(self.headers.get('Content-Length', 0))
-            body    = json.loads(self.rfile.read(length))
+            try:
+                length = int(self.headers.get('Content-Length', 0))
+                body   = json.loads(self.rfile.read(length))
+            except (ValueError, json.JSONDecodeError):
+                self.send_response(400)
+                self.end_headers()
+                return
             new_key = body.get('session_key', '').strip()
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
@@ -612,7 +588,8 @@ class ClaudeMonitorApp(ctk.CTk):
         # État de la fenêtre
         self._topmost = False      # mode "toujours au premier plan"
         self._drag_x = self._drag_y = 0
-        self._tray   = None        # instance pystray (system tray)
+        self._tray            = None   # instance pystray (system tray)
+        self._settings_dialog = None   # référence pour fermeture automatique
 
         # Chargement de la configuration sauvegardée
         self.config      = ConfigManager.load()
@@ -689,7 +666,7 @@ class ClaudeMonitorApp(ctk.CTk):
     def reload_app(self):
         """Recharge la config depuis le disque et relance la séquence d'initialisation."""
         self.config      = ConfigManager.load()
-        self.session_key = self.config["session_key"]
+        self.session_key = self.config.get("session_key", "")
         self.setup_session()
         self.update_status("● Redémarrage...", "gray")
         threading.Thread(target=self.init_sequence, daemon=True).start()
@@ -1064,12 +1041,12 @@ class ClaudeMonitorApp(ctk.CTk):
             r_prepaid = self.session.get(
                 f"{BASE_URL}/organizations/{self.org_id}/prepaid/credits", timeout=10)
 
-            if r_usage.status_code == 200:
+            if r_usage.status_code == 200 and r_limit.status_code == 200 and r_prepaid.status_code == 200:
                 # Tout OK → mise à jour de l'UI dans le thread principal
                 self.after(0, lambda: self.update_ui(
                     r_usage.json(), r_limit.json(), r_prepaid.json()
                 ))
-            elif r_usage.status_code == 403:
+            elif r_usage.status_code == 403 or r_limit.status_code == 403 or r_prepaid.status_code == 403:
                 # Session expirée → l'utilisateur doit rafraîchir sa sessionKey
                 self.update_status("🔒 Session expirée", COLOR_CRIT)
             else:
