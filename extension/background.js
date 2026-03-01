@@ -25,8 +25,8 @@
 //   La réactiver uniquement en cas de changement de session Claude.
 // ================================================================
 
-const APP_URL        = 'http://localhost:27182/session-key';
-const PING_URL       = 'http://localhost:27182/ping';
+const APP_URL        = 'http://127.0.0.1:27182/session-key';
+const PING_URL       = 'http://127.0.0.1:27182/ping';
 const RETRY_DELAY_MS = 5000;   // délai entre tentatives (ms)
 const MAX_RETRIES    = 10;     // nb max de tentatives au démarrage
 const POLL_DELAY_MS  = 10000;  // intervalle de surveillance de l'app (ms)

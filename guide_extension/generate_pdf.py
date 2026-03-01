@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 # ================================================================
 # CLAUDE-WIN-MONITOR — Générateur PDF du guide d'installation
-# Convertit GUIDE-SESSION-KEY.html → GUIDE-SESSION-KEY.pdf (A4)
+# Convertit "Guide d'installation.html" → "Guide d'installation.pdf" (A4)
 #
 # Auteur  : 🅻🅶 @ IA Mastery
-# Date    : 28/02/2026
+# Date    : 01/03/2026
 # ================================================================
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 HERE     = Path(__file__).parent.resolve()
-HTML_IN  = HERE / "GUIDE-SESSION-KEY.html"
-PDF_OUT  = HERE / "GUIDE-SESSION-KEY.pdf"
+HTML_IN  = HERE / "Guide d'installation.html"
+PDF_OUT  = HERE / "Guide d'installation.pdf"
 
 print(f"Source  : {HTML_IN}")
 print(f"Sortie  : {PDF_OUT}")

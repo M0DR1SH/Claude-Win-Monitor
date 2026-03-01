@@ -49,6 +49,9 @@ except ImportError:
     _HAVE_TRAY = False
 
 
+# Répertoire du script (chemins absolus indépendants du CWD)
+_HERE = os.path.dirname(os.path.abspath(__file__))
+
 # ── CONSTANTES GLOBALES ──────────────────────────────────────────────────────
 
 BASE_URL             = "https://claude.ai/api"   # base des endpoints API
@@ -192,10 +195,6 @@ class ConfigManager:
             data["org_id"] = org_id
         with open(CONFIG_FILE, 'w') as f:
             json.dump(data, f)
-
-
-# ── ICÔNE DE STATUT ──────────────────────────────────────────────────────────
-
 
 
 # ── FENÊTRES MODALES (base commune) ──────────────────────────────────────────
@@ -517,7 +516,7 @@ class _SessionKeyHandler(BaseHTTPRequestHandler):
             try:
                 length = int(self.headers.get('Content-Length', 0))
                 body   = json.loads(self.rfile.read(length))
-            except (ValueError, json.JSONDecodeError):
+            except (ValueError, json.JSONDecodeError, OSError):
                 self.send_response(400)
                 self.end_headers()
                 return
@@ -598,7 +597,8 @@ class ClaudeMonitorApp(ctk.CTk):
 
         # Session HTTP avec impersonation Chrome (contourne les vérifications User-Agent)
         self.session    = requests.Session(impersonate="chrome120")
-        self.is_running = True   # flag pour arrêter la boucle de refresh proprement
+        self.is_running      = True   # flag pour arrêter la boucle de refresh proprement
+        self._session_expired = False  # True si 403 reçu → stoppe la boucle
 
         self._set_window_icon()
         self.create_ui()
@@ -620,7 +620,10 @@ class ClaudeMonitorApp(ctk.CTk):
 
     def _set_window_icon(self):
         """Applique l'icône .ico à la fenêtre (visible dans Alt+Tab)."""
-        for fname in ("work/Claude-Win-Monitor_ICO.ico", "work/icon3.ico"):
+        for fname in (
+            os.path.join(_HERE, "work", "Claude-Win-Monitor_ICO.ico"),
+            os.path.join(_HERE, "work", "icon3.ico"),
+        ):
             if os.path.exists(fname):
                 try:
                     self.wm_iconbitmap(fname)
@@ -643,12 +646,14 @@ class ClaudeMonitorApp(ctk.CTk):
 
     def _load_logo(self, size=(52, 52)):
         """Charge le logo de l'app en CTkImage. Retourne None si aucun fichier trouvé."""
-        for fname in ("Claude-Win-Monitor_ICO.png", "icon3.png"):
-            if os.path.exists(fname):
-                try:
-                    return ctk.CTkImage(Image.open(fname), size=size)
-                except Exception:
-                    pass
+        for fname in (
+            os.path.join(_HERE, "Claude-Win-Monitor_ICO.png"),
+            os.path.join(_HERE, "work", "icon3.png"),
+        ):
+            try:
+                return ctk.CTkImage(Image.open(fname), size=size)
+            except Exception:
+                pass
         return None
 
     # ── GESTION DE LA SESSION KEY ─────────────────────────────────────────────
@@ -657,14 +662,18 @@ class ClaudeMonitorApp(ctk.CTk):
         """Appelé par le receiver HTTP quand l'extension envoie une nouvelle clé.
         Ferme la fenêtre Paramètres si elle est ouverte, puis recharge l'app."""
         ConfigManager.save(session_key)
-        try:
-            self._settings_dialog.destroy()
-        except Exception:
-            pass
+        if self._settings_dialog is not None:
+            try:
+                self._settings_dialog.destroy()
+            except Exception:
+                pass
+            self._settings_dialog = None
+        self._session_expired = False
         self.reload_app()
 
     def reload_app(self):
         """Recharge la config depuis le disque et relance la séquence d'initialisation."""
+        self._session_expired = False
         self.config      = ConfigManager.load()
         self.session_key = self.config.get("session_key", "")
         self.setup_session()
@@ -699,7 +708,7 @@ class ClaudeMonitorApp(ctk.CTk):
         if not _HAVE_TRAY:
             return
         try:
-            img = Image.open("Claude-Win-Monitor_ICO.png").resize((64, 64))
+            img = Image.open(os.path.join(_HERE, "Claude-Win-Monitor_ICO.png")).resize((64, 64))
         except Exception:
             img = Image.new("RGB", (64, 64), "#3b82f6")  # fallback carré bleu
 
@@ -1011,17 +1020,16 @@ class ClaudeMonitorApp(ctk.CTk):
             else:
                 self.update_status("⚠️ Organisation introuvable", COLOR_CRIT)
 
-        except Exception as e:
-            print(e)
+        except Exception:
             self.update_status("❌ Erreur connexion", COLOR_CRIT)
 
     def background_loop(self):
         """Boucle infinie (thread) : fetch_data() puis attente REFRESH_RATE_SECONDS.
-        S'arrête proprement quand is_running passe à False."""
-        while self.is_running:
+        S'arrête proprement quand is_running passe à False ou _session_expired à True."""
+        while self.is_running and not self._session_expired:
             self.fetch_data()
             for _ in range(REFRESH_RATE_SECONDS):
-                if not self.is_running:
+                if not self.is_running or self._session_expired:
                     break
                 time.sleep(1)
 
@@ -1047,8 +1055,10 @@ class ClaudeMonitorApp(ctk.CTk):
                     r_usage.json(), r_limit.json(), r_prepaid.json()
                 ))
             elif r_usage.status_code == 403 or r_limit.status_code == 403 or r_prepaid.status_code == 403:
-                # Session expirée → l'utilisateur doit rafraîchir sa sessionKey
-                self.update_status("🔒 Session expirée", COLOR_CRIT)
+                # Session expirée → stopper la boucle et ouvrir les Paramètres
+                self._session_expired = True
+                self.update_status("🔒 Session expirée — relancer l'extension", COLOR_CRIT)
+                self.after(0, self.open_settings)
             else:
                 self.update_status(f"⚠️ Erreur API {r_usage.status_code}", COLOR_WARN)
 

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Claude Session Helper",
-  "version": "1.0",
-  "description": "Claude-Win-Monitor — Transmission automatique de la sessionKey. 🅻🅶 @ IA Mastery (28/02/2026)",
+  "version": "1.8.2",
+  "description": "Claude-Win-Monitor — Transmission automatique de la sessionKey. 🅻🅶 @ IA Mastery (01/03/2026)",
 
   "permissions": [
     "cookies",
@@ -10,7 +10,7 @@
   ],
   "host_permissions": [
     "https://claude.ai/*",
-    "http://localhost:27182/*"
+    "http://127.0.0.1:27182/*"
   ],
 
   "background": {
