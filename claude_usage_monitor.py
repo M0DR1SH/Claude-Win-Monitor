@@ -725,13 +725,22 @@ class ClaudeMonitorApp(ctk.CTk):
         """Masque la fenêtre (elle reste active en tray)."""
         self.withdraw()
 
+    def _bring_to_front(self):
+        """Force la fenêtre au premier plan, quelle que soit son état."""
+        self.deiconify()
+        self.wm_attributes("-topmost", True)   # élève momentanément
+        self.lift()
+        self.focus_force()
+        if not self._topmost:
+            self.after(100, lambda: self.wm_attributes("-topmost", False))
+
     def _show_window(self, *_):
-        """Restaure la fenêtre depuis le tray."""
-        self.after(0, self.deiconify)
-        self.after(0, lambda: self.wm_attributes("-topmost", self._topmost))
+        """Restaure la fenêtre depuis le tray et la place au premier plan."""
+        self.after(0, self._bring_to_front)
 
     def _tray_refresh(self, *_):
-        """Déclenche un rafraîchissement manuel depuis le menu tray."""
+        """Déclenche un rafraîchissement et ramène la fenêtre au premier plan."""
+        self.after(0, self._bring_to_front)
         threading.Thread(target=self.fetch_data, daemon=True).start()
 
     def _quit_from_tray(self, *_):
