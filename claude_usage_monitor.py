@@ -1,8 +1,8 @@
 # ===============================================================
-# CLAUDE-WIN-MONITOR v1.8.1
+# CLAUDE-WIN-MONITOR v1.8.2
 # 🅻🅶's Claude Usage Monitor pour suivre les quotas Anthropic
 # Auteur  : 🅻🅶 @ IA Mastery
-# Date    : 28/02/2026
+# Date    : 01/03/2026
 # ===============================================================
 #
 # Architecture générale :
@@ -57,8 +57,8 @@ CONFIG_FILE          = "claude_monitor_config.json"
 
 APP_NAME    = "Claude Usage Monitor"
 APP_AUTHOR  = "🅻🅶 @ IA Mastery"
-APP_VERSION = "v1.8.1"
-APP_DATE    = "28/02/2026"
+APP_VERSION = "v1.8.2"
+APP_DATE    = "01/03/2026"
 
 # ── PALETTE DE COULEURS ──────────────────────────────────────────────────────
 # Trois niveaux d'alerte : safe (vert) / warn (orange) / crit (rouge)
