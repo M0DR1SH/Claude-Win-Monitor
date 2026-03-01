@@ -455,7 +455,7 @@ class InfoDialog(_BaseDialog):
                      font=("Segoe UI", 11), text_color="#666", anchor="w").pack(side="left")
         ctk.CTkButton(
             author_row, text=APP_AUTHOR,
-            font=("Segoe UI", 11, "bold"), text_color=COLOR_BLUE,
+            font=("Segoe UI", 11), text_color=COLOR_BLUE,
             fg_color="transparent", hover_color="#1a2030",
             anchor="w", height=22, corner_radius=4,
             command=lambda: webbrowser.open(self._AUTHOR_URL)
