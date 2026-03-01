@@ -1,5 +1,25 @@
 # CHANGELOG — Claude-Win-Monitor
 
+## v1.8.3 — 01/03/2026
+
+### Corrections
+- **UI** SettingsDialog : hover des boutons liens plus visible (vert `#0b2115→#1e4d2e`, bleu `#0d1f3c→#1a3a5c`)
+
+### Corrections exhaustives (analyse de projet)
+- `generate_pdf.py` : noms de fichiers corrigés (`GUIDE-SESSION-KEY.*` → `Guide d'installation.*`)
+- `extension/background.js` : `localhost` → `127.0.0.1` (cohérence avec le receiver Python)
+- `extension/manifest.json` : version `1.0` → `1.8.3`, date mise à jour, host `127.0.0.1`
+- `claude_usage_monitor.py` : `_HERE` pour chemins absolus des icônes (indépendant du CWD)
+- `claude_usage_monitor.py` : `_session_expired` flag → stoppe `background_loop` sur 403 + ouvre Paramètres
+- `claude_usage_monitor.py` : `_on_new_session_key` — vérification `if is not None` + reset `_session_expired`
+- `claude_usage_monitor.py` : `reload_app()` reset `_session_expired`
+- `claude_usage_monitor.py` : `do_POST` — ajout `OSError` dans except
+- `claude_usage_monitor.py` : suppression `print(e)` dans `init_sequence`
+- `claude_usage_monitor.py` : suppression section fantôme "ICÔNE DE STATUT"
+- `CHANGELOG.md` : v1.7.2 simplifié, suppression duplication avec v1.8.0
+
+---
+
 ## v1.8.2 — 01/03/2026
 
 ### Corrections (revue de code)
