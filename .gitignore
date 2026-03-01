@@ -37,3 +37,6 @@ playwright-claude-profile/
 
 # Fichier vide parasite
 nul
+
+# Claude Code (config locale)
+.claude/
