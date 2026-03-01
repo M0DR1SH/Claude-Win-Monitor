@@ -1,5 +1,5 @@
 # ===============================================================
-# CLAUDE-WIN-MONITOR v1.8.2
+# CLAUDE-WIN-MONITOR v1.8.3
 # 🅻🅶's Claude Usage Monitor pour suivre les quotas Anthropic
 # Auteur  : 🅻🅶 @ IA Mastery
 # Date    : 01/03/2026
@@ -60,7 +60,7 @@ CONFIG_FILE          = "claude_monitor_config.json"
 
 APP_NAME    = "Claude Usage Monitor"
 APP_AUTHOR  = "🅻🅶 @ IA Mastery"
-APP_VERSION = "v1.8.2"
+APP_VERSION = "v1.8.3"
 APP_DATE    = "01/03/2026"
 
 # ── PALETTE DE COULEURS ──────────────────────────────────────────────────────
@@ -328,7 +328,7 @@ class SettingsDialog(_BaseDialog):
         ctk.CTkButton(
             inner1, text="↗  Ouvrir le guide d'installation",
             command=self._open_guide,
-            fg_color="transparent", hover_color="#0b2115",
+            fg_color="transparent", hover_color="#1e4d2e",
             text_color=COLOR_SAFE, font=("Segoe UI", 12),
             anchor="w", height=24, corner_radius=4
         ).pack(anchor="w")
@@ -355,7 +355,7 @@ class SettingsDialog(_BaseDialog):
         ctk.CTkButton(
             inner2, text="↗  Ouvrir claude.ai",
             command=lambda: webbrowser.open("https://claude.ai"),
-            fg_color="transparent", hover_color="#0d1f3c",
+            fg_color="transparent", hover_color="#1a3a5c",
             text_color=COLOR_BLUE, font=("Segoe UI", 12),
             anchor="w", height=24, corner_radius=4
         ).pack(anchor="w")
