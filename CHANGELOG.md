@@ -2,6 +2,9 @@
 
 ## v1.8.3 — 01/03/2026
 
+### Nouveau
+- **UX** Tray "Afficher" et "Actualiser" : fenêtre forcée au premier plan (`_bring_to_front` — deiconify + topmost temporaire + lift + focus_force)
+
 ### Corrections
 - **UI** SettingsDialog : hover des boutons liens plus visible (vert `#0b2115→#1e4d2e`, bleu `#0d1f3c→#1a3a5c`)
 
