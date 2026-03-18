@@ -1,8 +1,8 @@
 # ===============================================================
-# CLAUDE-WIN-MONITOR v1.8.3
+# CLAUDE-WIN-MONITOR v1.8.4
 # 🅻🅶's Claude Usage Monitor pour suivre les quotas Anthropic
 # Auteur  : 🅻🅶 @ IA Mastery
-# Date    : 01/03/2026
+# Date    : 18/03/2026
 # ===============================================================
 #
 # Architecture générale :
@@ -60,8 +60,8 @@ CONFIG_FILE          = "claude_monitor_config.json"
 
 APP_NAME    = "Claude Usage Monitor"
 APP_AUTHOR  = "🅻🅶 @ IA Mastery"
-APP_VERSION = "v1.8.3"
-APP_DATE    = "01/03/2026"
+APP_VERSION = "v1.8.4"
+APP_DATE    = "18/03/2026"
 
 # ── PALETTE DE COULEURS ──────────────────────────────────────────────────────
 # Trois niveaux d'alerte : safe (vert) / warn (orange) / crit (rouge)
@@ -1064,7 +1064,7 @@ class ClaudeMonitorApp(ctk.CTk):
         │ Texte gauche (reset/conso)    Texte droite (date/solde) │  ← footer 2-col
         └─────────────────────────────────────────────────────────┘
 
-        v1.8.3+ : suppressions des SOUS-TITRES (= -~50px de hauteur par carte).
+        v1.8.4+ : suppressions des SOUS-TITRES (= -~50px de hauteur par carte).
         v1.8.4+ : FOOTER en 2 colonnes (left/right) au lieu de 1 ligne centrado.
 
         Args:
