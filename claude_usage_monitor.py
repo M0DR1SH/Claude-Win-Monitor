@@ -156,6 +156,66 @@ class Tooltip:
 
 # ── UTILITAIRES ──────────────────────────────────────────────────────────────
 
+def _load_icon(path, color_hex, size=(22, 22)):
+    """Charge un PNG blanc sur fond transparent et le teinte dans la couleur souhaitée.
+    Retourne un CTkImage prêt à l'emploi, ou None si le fichier est introuvable."""
+    try:
+        img = Image.open(path).convert("RGBA")
+        rv = int(color_hex[1:3], 16)
+        gv = int(color_hex[3:5], 16)
+        bv = int(color_hex[5:7], 16)
+        r, g, b, a = img.split()
+        r = r.point(lambda _: rv)
+        g = g.point(lambda _: gv)
+        b = b.point(lambda _: bv)
+        return ctk.CTkImage(Image.merge("RGBA", (r, g, b, a)), size=size)
+    except Exception:
+        return None
+
+
+def format_date_long(iso_date_str):
+    """Retourne la date au format long : 'mercredi 18 mars à 15h'."""
+    if not iso_date_str:
+        return ""
+    try:
+        import datetime as _dt
+        dt     = dateutil.parser.isoparse(iso_date_str).astimezone()
+        days   = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
+        months = ["", "janvier", "février", "mars", "avril", "mai", "juin",
+                  "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
+        return f"{days[dt.weekday()]} {dt.day} {months[dt.month]} à {dt.hour}h"
+    except Exception:
+        return ""
+
+
+def format_time_remaining(iso_date_str, include_days=False):
+    """Retourne le temps restant avant la date donnée.
+    include_days=False → 'Xh YYm'   (session 5h)
+    include_days=True  → 'Wj Xh YYm' (hebdomadaire)"""
+    if not iso_date_str:
+        return "—"
+    try:
+        import datetime as _dt
+        dt        = dateutil.parser.isoparse(iso_date_str).astimezone()
+        now       = _dt.datetime.now(tz=dt.tzinfo)
+        total_sec = int((dt - now).total_seconds())
+        if total_sec <= 0:
+            return "0h 00m"
+        total_min = total_sec // 60
+        if include_days:
+            days  = total_min // (24 * 60)
+            rem   = total_min % (24 * 60)
+            hours = rem // 60
+            mins  = rem % 60
+            return f"{days}j {hours}h {mins:02d}m"
+        else:
+            hours = total_min // 60
+            mins  = total_min % 60
+            return f"{hours}h {mins:02d}m"
+    except Exception:
+        return "—"
+
+
 def format_date_french(iso_date_str):
     """Convertit une date ISO 8601 (UTC ou avec offset) en texte français localisé.
     Ex : '2026-02-28T10:00:01+00:00' → 'sam 28 févr à 11h00'"""
@@ -575,14 +635,22 @@ class ClaudeMonitorApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
+        # ── CONFIGURATION FENÊTRE ─────────────────────────────────────────────────
         # Fenêtre sans barre de titre Windows native — on gère tout custom
+        # (permet le drag, les coins arrondis Windows 11, et un layout compact)
         self.overrideredirect(True)
         self.resizable(False, False)
         self.configure(fg_color="#484848")  # 1px visible comme bordure extérieure
 
-        # Hauteur calculée automatiquement après rendu (voir _fit_and_center)
-        self.geometry("380x100")
-        self.after(20, self._fit_and_center)
+        # ── DIMENSIONNEMENT FIXE 380×592 ──────────────────────────────────────────
+        # Après tests exhaustifs, la hauteur fixe 592px est requise pour que le contenu
+        # (titlebar 36 + header ~80 + cards ~320 + bottom 56 + paddings) tienne juste.
+        # Dimensionnement DYNAMIQUE via winfo_reqheight() n'a pas fonctionné sur CTkTk
+        # car le root frame avec expand=True retourne la taille allouée, pas le minimum
+        # du contenu. Solution finale : taille fixe + pack() sans expand.
+        sw, sh = self.winfo_screenwidth(), self.winfo_screenheight()
+        x, y = max(0, (sw - 380) // 2), max(0, (sh - 592) // 2)
+        self.geometry(f"380x592+{x}+{y}")
 
         # État de la fenêtre
         self._topmost = False      # mode "toujours au premier plan"
@@ -601,6 +669,7 @@ class ClaudeMonitorApp(ctk.CTk):
         self._session_expired = False  # True si 403 reçu → stoppe la boucle
 
         self._set_window_icon()
+        self._preload_icons()
         self.create_ui()
         self._setup_tray()
         self.after(200, self._apply_rounded_corners)
@@ -631,15 +700,22 @@ class ClaudeMonitorApp(ctk.CTk):
                 except Exception:
                     pass
 
-    def _fit_and_center(self):
-        """Ajuste la hauteur de la fenêtre à son contenu réel, puis la centre à l'écran."""
-        self.update_idletasks()
-        h  = self.winfo_reqheight()
+    def _center_window(self):
+        """Centre la fenêtre à l'écran (taille fixe 380×592).
+
+        OBSOLÈTE depuis v1.8.4 — la géométrie est maintenant définie dans __init__
+        et ne change plus après. Cette méthode reste si recentrage futur est nécessaire.
+
+        Résolution de bugs précédents :
+        - Avant : tentatives de _fit_and_center() avec calculs dynamiques de hauteur.
+        - Problem: winfo_reqheight() sur CTkTk retournait la taille allouée, pas le min.
+        - Solution : taille fixe 380×592 (valeur confirmée par le user).
+        """
         sw = self.winfo_screenwidth()
         sh = self.winfo_screenheight()
         x  = max(0, (sw - 380) // 2)
-        y  = max(0, (sh - h)  // 2)
-        self.geometry(f"380x{h}+{x}+{y}")
+        y  = max(0, (sh - 592) // 2)
+        self.geometry(f"380x592+{x}+{y}")
 
     def _apply_rounded_corners(self):
         _apply_rounded_corners_to(self)
@@ -655,6 +731,17 @@ class ClaudeMonitorApp(ctk.CTk):
             except Exception:
                 pass
         return None
+
+    def _preload_icons(self):
+        """Charge et teinte les icônes PNG utilisées dans les boutons et titres de cartes."""
+        b = _HERE
+        self._icon_refresh      = _load_icon(os.path.join(b, "IMG-refresh.png"),      "#f59e0b", (22, 22))
+        self._icon_engrenage    = _load_icon(os.path.join(b, "IMG-engrenage.png"),    "#888888", (22, 22))
+        self._icon_poweroff     = _load_icon(os.path.join(b, "IMG-power-off.png"),    COLOR_CRIT, (22, 22))
+        self._icon_info         = _load_icon(os.path.join(b, "IMG-information.png"),  COLOR_BLUE, (20, 20))
+        self._icon_session      = _load_icon(os.path.join(b, "IMG-session.png"),      "#cccccc", (18, 18))
+        self._icon_hebdo        = _load_icon(os.path.join(b, "IMG-hebdomadaire.png"), "#cccccc", (18, 18))
+        self._icon_portefeuille = _load_icon(os.path.join(b, "IMG-portefeuille.png"), "#cccccc", (18, 18))
 
     # ── GESTION DE LA SESSION KEY ─────────────────────────────────────────────
 
@@ -817,41 +904,32 @@ class ClaudeMonitorApp(ctk.CTk):
         ).pack(side="left", padx=2, pady=4)
 
     def create_ui(self):
-        """Construit l'intégralité de l'UI : titlebar, header, cartes, barre du bas."""
-        # Fond principal avec 1px de gap → bordure visible partout
+        """Construit l'intégralité de l'UI : titlebar, header, cartes, barre du bas.
+
+        ── LAYOUT ARCHITECTURE ──────────────────────────────────────────────────────
+        Pack order (top → bottom, pas de side="bottom") :
+
+        1. titlebar (height=36, pack_propagate=False)
+        2. separator (height=1)
+        3. header (logo + user info + status badge + refresh btn)
+        4. separator
+        5. cards (3 cartes : Session / Hebdomadaire / Budget)
+        6. bottom bar (height=56, pack_propagate=False, grid layout pour boutons)
+
+        IMPORTANT : root.pack(fill="x") SAN expand=True pour éviter les gaps.
+        Avant cette correction, bottom.pack(side="bottom") créait un espace vide
+        entre les cartes et les boutons car root avait expand=True et était plus grand
+        que le contenu réel. La solution : ordre naturel pack (top→bottom) sans side="bottom".
+        """
+        # Fond principal avec 1px de gap → bordure visible partout (gris #484848)
         root = ctk.CTkFrame(self, fg_color=COLOR_BG, corner_radius=0)
-        root.pack(fill="both", expand=True, padx=1, pady=1)
+        root.pack(fill="x", padx=1, pady=1)  # fill="x" SEULEMENT, pas expand=True
+        self._root_frame = root
 
         self._build_titlebar(root)
 
         # Ligne de séparation titlebar / contenu
         ctk.CTkFrame(root, height=1, fg_color="#1e1e1e", corner_radius=0).pack(fill="x")
-
-        # Barre du bas packée EN PREMIER pour garantir sa visibilité (le pack remonte)
-        bottom = ctk.CTkFrame(root, fg_color="#181818", corner_radius=0, height=56)
-        bottom.pack(side="bottom", fill="x")
-        bottom.pack_propagate(False)
-
-        btn_settings = ctk.CTkButton(
-            bottom, text="⚙   Paramètres", command=self.open_settings,
-            fg_color="transparent", hover_color="#252525",
-            text_color="#888", font=("Segoe UI", 14), corner_radius=0
-        )
-        btn_settings.pack(side="left", expand=True, fill="both")
-        Tooltip(btn_settings, "Modifier la clé de session")
-
-        # Séparateur vertical entre les deux boutons
-        ctk.CTkFrame(bottom, width=1, fg_color="#2a2a2a").pack(
-            side="left", fill="y", pady=10
-        )
-
-        btn_quit = ctk.CTkButton(
-            bottom, text="⏻   Quitter", command=self.quit_app,
-            fg_color="transparent", hover_color="#2a0e0e",
-            text_color=COLOR_CRIT, font=("Segoe UI", 14), corner_radius=0
-        )
-        btn_quit.pack(side="right", expand=True, fill="both")
-        Tooltip(btn_quit, "Quitter l'application")
 
         # Header : logo 52px + nom utilisateur + email + badge de statut + boutons
         header = ctk.CTkFrame(root, fg_color="transparent")
@@ -902,38 +980,108 @@ class ClaudeMonitorApp(ctk.CTk):
         right_col.pack(side="right", anchor="n")
 
         btn_refresh = ctk.CTkButton(
-            right_col, text="↻", width=36, height=36,
+            right_col,
+            image=self._icon_refresh, text="" if self._icon_refresh else "↻",
+            width=56, height=56,
             command=self.manual_refresh,
-            fg_color="#242424", hover_color="#303030",
-            corner_radius=10, font=("Segoe UI", 16, "bold")
+            fg_color="#242424", hover_color="#303020",
+            text_color="#f59e0b",
+            corner_radius=10, font=("Segoe UI", 20, "bold")
         )
-        btn_refresh.pack(pady=(0, 6))
+        btn_refresh.pack()
         Tooltip(btn_refresh, "Actualiser les données")
-
-        btn_info = ctk.CTkButton(
-            right_col, text="i", width=36, height=36,
-            command=self._show_info,
-            fg_color="#242424", hover_color="#303030",
-            text_color=COLOR_BLUE, corner_radius=10,
-            font=("Segoe UI", 16, "bold")
-        )
-        btn_info.pack()
-        Tooltip(btn_info, "À propos de l'application")
 
         # Séparateur header / cartes
         ctk.CTkFrame(root, height=1, fg_color="#242424").pack(fill="x", pady=(14, 0))
 
         # Zone des 3 cartes (tk.Frame natif pour une gestion de hauteur fiable)
         cards = tk.Frame(root, bg=COLOR_BG)
-        cards.pack(fill="both", expand=True, padx=14, pady=(12, 6))
+        cards.pack(fill="x", padx=14, pady=(12, 6))
+        self._cards_frame = cards
 
-        self.card_session = self._make_card(cards, "Session en cours", "Limite glissante de 5h")
-        self.card_weekly  = self._make_card(cards, "Hebdomadaire",      "Limite de 7 jours")
-        self.card_billing = self._make_card(cards, "Budget mensuel",    "Chargement...")
+        self.card_session = self._make_card(cards, "Session en cours", "Limite glissante de 5h",              icon=self._icon_session)
+        self.card_weekly  = self._make_card(cards, "Hebdomadaire",      "Limite de 7 jours",                   icon=self._icon_hebdo)
+        self.card_billing = self._make_card(cards, "Budget mensuel",    "Budget mensuel supplémentaire déposé", icon=self._icon_portefeuille)
 
-    def _make_card(self, parent, title, subtitle):
-        """Crée une carte statistique réutilisable.
-        Retourne un dict avec les références aux widgets dynamiques (p, bar, sub, reset)."""
+        # ── BARRE DU BAS (3 boutons + séparateurs) ────────────────────────────────
+        # Packée EN DERNIER pour éviter les gaps liés à side="bottom".
+        # IMPORTANT : height=56 est FIXE via pack_propagate(False).
+        # Le grid layout avec weight=1 sur les colonnes (0,2,4) rend les boutons
+        # équilargeur (uniform="btn"), pas les hauteurs.
+        bottom = ctk.CTkFrame(root, fg_color="#181818", corner_radius=0, height=56)
+        bottom.pack(fill="x")  # pas side="bottom", ordre naturel top→bottom
+        bottom.pack_propagate(False)  # VERROUILLE la hauteur à 56px exactement
+        bottom.grid_columnconfigure((0, 2, 4), weight=1, uniform="btn")  # 3 boutons largeur égale
+        bottom.grid_rowconfigure(0, weight=1)  # une seule ligne de boutons
+
+        btn_settings = ctk.CTkButton(
+            bottom,
+            image=self._icon_engrenage, text="" if self._icon_engrenage else "⚙",
+            command=self.open_settings,
+            fg_color="transparent", hover_color="#252525",
+            text_color="#888", font=("Segoe UI", 22), corner_radius=0
+        )
+        btn_settings.grid(row=0, column=0, sticky="nsew")
+        Tooltip(btn_settings, "Paramètres")
+
+        ctk.CTkFrame(bottom, width=1, fg_color="#2a2a2a").grid(
+            row=0, column=1, sticky="ns", pady=10
+        )
+
+        btn_info_bar = ctk.CTkButton(
+            bottom,
+            image=self._icon_info, text="" if self._icon_info else "i",
+            command=self._show_info,
+            fg_color="transparent", hover_color="#1a2540",
+            text_color=COLOR_BLUE, font=("Segoe UI", 18, "bold"), corner_radius=0
+        )
+        btn_info_bar.grid(row=0, column=2, sticky="nsew")
+        Tooltip(btn_info_bar, "À propos de l'application")
+
+        ctk.CTkFrame(bottom, width=1, fg_color="#2a2a2a").grid(
+            row=0, column=3, sticky="ns", pady=10
+        )
+
+        btn_quit = ctk.CTkButton(
+            bottom,
+            image=self._icon_poweroff, text="" if self._icon_poweroff else "⏻",
+            command=self.quit_app,
+            fg_color="transparent", hover_color="#2a0e0e",
+            text_color=COLOR_CRIT, font=("Segoe UI", 22), corner_radius=0
+        )
+        btn_quit.grid(row=0, column=4, sticky="nsew")
+        Tooltip(btn_quit, "Quitter l'application")
+
+    def _make_card(self, parent, title, tooltip_text, icon=None):
+        """Crée une carte statistique réutilisable pour afficher un quota (Session/Hebdo/Budget).
+
+        Structure interne d'une carte :
+        ┌─────────────────────────────────────────────────────────┐
+        │ 🎨 ICON  Titre en gras                           NN%     │  ← row (flex)
+        │━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━│
+        │ [██████████░░░░░░░░] progression bar (10px)             │
+        │━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━│
+        │ Texte gauche (reset/conso)    Texte droite (date/solde) │  ← footer 2-col
+        └─────────────────────────────────────────────────────────┘
+
+        v1.8.3+ : suppressions des SOUS-TITRES (= -~50px de hauteur par carte).
+        v1.8.4+ : FOOTER en 2 colonnes (left/right) au lieu de 1 ligne centrado.
+
+        Args:
+            parent: tk.Frame parent (cards zone)
+            title: str — "Session en cours" / "Hebdomadaire" / "Budget mensuel"
+            tooltip_text: str — infobulle au survol (icon + titre)
+            icon: CTkImage | None — icône 18×18 PNG tintée
+
+        Returns:
+            dict {
+                "card": CTkFrame — le container principal (mutable fg_color selon usage %)
+                "p": CTkLabel — le % en gros (24px bold, text_color dynamique)
+                "bar": CTkProgressBar — barre progress (height=10, corner=5)
+                "reset_left": CTkLabel — texte bas-gauche (reset/conso)
+                "reset_right": CTkLabel — texte bas-droite (date/solde)
+            }
+        """
         wrapper = tk.Frame(parent, bg=COLOR_BG)
         wrapper.pack(fill="x", pady=(0, 10))
 
@@ -943,49 +1091,64 @@ class ClaudeMonitorApp(ctk.CTk):
         )
         card.pack(fill="x")
 
+        # Zone titre : icon + titre (gauche) + % (droite)
         inner = ctk.CTkFrame(card, fg_color="transparent")
         inner.pack(fill="x", padx=16, pady=(14, 0))
 
         row = ctk.CTkFrame(inner, fg_color="transparent")
         row.pack(fill="x")
 
-        ctk.CTkLabel(
-            row, text=title, font=("Segoe UI", 14, "bold"), anchor="w"
-        ).pack(side="left")
+        # Icon optionnel (18×18, couleur grise #cccccc)
+        if icon:
+            icon_lbl = ctk.CTkLabel(row, image=icon, text="")
+            icon_lbl.image = icon  # IMPORTANT : retenir ref pour éviter GC
+            icon_lbl.pack(side="left", padx=(0, 8))
+            Tooltip(icon_lbl, tooltip_text)
 
+        # Titre bold 14px (anchored west pour alignement gauche)
+        title_lbl = ctk.CTkLabel(
+            row, text=title, font=("Segoe UI", 14, "bold"), anchor="w"
+        )
+        title_lbl.pack(side="left")
+        Tooltip(title_lbl, tooltip_text)
+
+        # Pourcentage en gros (24px bold, couleur dynamique : green/orange/red)
         pct_zone = ctk.CTkFrame(row, fg_color="transparent")
         pct_zone.pack(side="right")
 
-        # Pourcentage affiché en grand à droite
         pct_lbl = ctk.CTkLabel(
             pct_zone, text="--%",
             font=("Segoe UI", 24, "bold"), text_color=COLOR_SAFE
         )
         pct_lbl.pack(side="left")
 
-        # Sous-titre (ex : "Limite glissante de 5h")
-        sub_lbl = ctk.CTkLabel(
-            inner, text=subtitle,
-            font=("Segoe UI", 12), text_color="#686868", anchor="w"
-        )
-        sub_lbl.pack(anchor="w", pady=(3, 0))
-
-        # Barre de progression
+        # Barre de progression (height=10px, corner=5 pour arrondi)
         bar = ctk.CTkProgressBar(
             card, height=10, corner_radius=5,
             progress_color=COLOR_SAFE, fg_color="#2e2e2e"
         )
-        bar.set(0.004)  # valeur minimale pour rendre la barre visible à 0%
-        bar.pack(fill="x", padx=16, pady=(10, 0))
+        bar.set(0.004)  # ~0.4% initialement (affiche quelque chose plutôt qu'une barre vide)
+        bar.pack(fill="x", padx=16, pady=(8, 0))
 
-        # Ligne de reset (ex : "Reset : sam 28 févr à 11h00")
-        reset_lbl = ctk.CTkLabel(
-            card, text="", font=("Segoe UI", 12), text_color="#686868"
+        # ── FOOTER : 2 colonnes (LEFT + RIGHT) ────────────────────────────────────
+        # Ligne 4: contient des textes contextuels petits (11px, gris #686868)
+        # LEFT : "Réinitialisation dans Xh Ym" (Session/Hebdo) ou "Conso : X.XX / Y.YY €" (Budget)
+        # RIGHT : "jeudi 20 mars à 15h" (Session/Hebdo) ou "Solde : XX.XX €" (Budget)
+        footer = ctk.CTkFrame(card, fg_color="transparent")
+        footer.pack(fill="x", padx=16, pady=(4, 12))
+
+        reset_left = ctk.CTkLabel(
+            footer, text="", font=("Segoe UI", 11), text_color="#686868", anchor="w"
         )
-        reset_lbl.pack(anchor="e", padx=16, pady=(5, 13))
+        reset_left.pack(side="left")
+
+        reset_right = ctk.CTkLabel(
+            footer, text="", font=("Segoe UI", 11), text_color="#686868", anchor="e"
+        )
+        reset_right.pack(side="right")
 
         return {"card": card, "p": pct_lbl, "bar": bar,
-                "sub": sub_lbl, "reset": reset_lbl}
+                "reset_left": reset_left, "reset_right": reset_right}
 
     # ── LOGIQUE MÉTIER ────────────────────────────────────────────────────────
 
@@ -1080,8 +1243,8 @@ class ClaudeMonitorApp(ctk.CTk):
         limits  : /overage_...     → monthly_credit_limit, used_credits
         prepaid : /prepaid/credits → amount (solde prépayé en centimes)"""
         five_hour = usage.get("five_hour", {})
-        self._update_bar_card(self.card_session, five_hour)
-        self._update_bar_card(self.card_weekly,  usage.get("seven_day", {}))
+        self._update_bar_card(self.card_session, five_hour,                  include_days=False)
+        self._update_bar_card(self.card_weekly,  usage.get("seven_day", {}), include_days=True)
 
         # Mise à jour du tooltip de l'icône tray avec le % session courant
         if self._tray:
@@ -1102,12 +1265,12 @@ class ClaudeMonitorApp(ctk.CTk):
         card["bar"].set(max(min(ratio, 1.0), 0.004))
         card["bar"].configure(progress_color=color)
         card["p"].configure(text=f"{int(ratio * 100)}%", text_color=color)
-        card["sub"].configure(text=f"{used_month:.2f} / {limit_cap:.2f} EUR")
-        card["reset"].configure(text=f"Solde : {balance_real:.2f} €")
+        card["reset_left"].configure(text=f"Conso : {used_month:.2f} / {limit_cap:.2f} €")
+        card["reset_right"].configure(text=f"Solde : {balance_real:.2f} €")
 
         self.update_status("● Système Opérationnel", COLOR_SAFE)
 
-    def _update_bar_card(self, card, data):
+    def _update_bar_card(self, card, data, include_days=False):
         """Met à jour une carte session ou hebdo avec les données de l'API.
         data = {"utilization": float, "resets_at": str|None}"""
         val   = data.get("utilization", 0.0)
@@ -1121,9 +1284,13 @@ class ClaudeMonitorApp(ctk.CTk):
         card["bar"].set(max(min(ratio, 1.0), 0.004))
         card["bar"].configure(progress_color=color)
         card["p"].configure(text=f"{int(val)}%", text_color=color)
-        card["reset"].configure(
-            text=f"Reset : {format_date_french(reset)}" if reset else "Aucune limite active"
-        )
+        if reset:
+            card["reset_left"].configure(
+                text=f"Reset : {format_time_remaining(reset, include_days)}")
+            card["reset_right"].configure(text=format_date_long(reset))
+        else:
+            card["reset_left"].configure(text="Aucune limite active")
+            card["reset_right"].configure(text="")
 
     @staticmethod
     def _ratio_color(ratio):

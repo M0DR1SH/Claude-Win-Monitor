@@ -1,5 +1,47 @@
 # CHANGELOG — Claude-Win-Monitor
 
+## v1.8.4 — 18/03/2026
+
+### UI Layout refactorisé (corrections exhaustives)
+
+#### Problématique initiale
+L'interface affichait un espace vide énorme entre les cartes de quotas et la barre du bas, rendant le 3e card (Budget) invisible. Les tentatives de calcul dynamique de hauteur via `winfo_reqheight()` ont toutes échoué (CTkTk/customtkinter ne retourne que la taille allouée, pas le minimum du contenu).
+
+#### Solutions finales implémentées
+
+**1. Taille fixe 380×592 pixels** (au lieu de calcul dynamique)
+- Valeur analytiquement calculée et confirmée par utilisateur
+- Centrée à l'écran dans `__init__()` (pas de recalculs dynamiques)
+- Élimine tous les artefacts de mesure de customtkinter
+
+**2. Pack order réorganisé (top→bottom naturel)**
+- AVANT : `bottom.pack(side="bottom")` créait un gap entre content et bottom
+- APRÈS : tous les widgets packés dans l'ordre top→bottom sans `side="bottom"`
+- Root avec `fill="x"` uniquement (pas `expand=True`)
+- Ordre : titlebar → separator → header → separator → cards → bottom
+- Résultat : stacking naturel, sans espace résidu
+
+**3. Suppression des calculs dynamiques**
+- Méthode `_fit_and_center()` dépréciée (remplacée par `_center_window()` utility)
+- Plus d'appels à `self.after(100, self._fit_and_center)`
+- Plus de `self.update()` qui déclenchait des callbacks cascadés
+- Plus de `winfo_reqheight()` sur root ou fenêtre
+
+#### Code changes
+- `__init__()` : géométrie fixe 380×592 + centrage au démarrage
+- `create_ui()` : pack order réorganisé, commentaires exhaustifs
+- `_make_card()` : documentation complète de la structure et footer 2-col
+- `_center_window()` : dépréciée (legacy si recentrage futur)
+- `CLAUDE.md` : ajout section "UI Layout (v1.8.4+)" détaillée
+
+#### Résultats
+✅ Les 3 cartes de quotas sont maintenant visibles
+✅ Barre du bas fixée à 56px (plus de démesure)
+✅ Fenêtre compact et centré, sans gap, hauteur stable
+✅ Code plus clair avec commentaires exhaustifs
+
+---
+
 ## v1.8.3 — 01/03/2026
 
 ### Nouveau
