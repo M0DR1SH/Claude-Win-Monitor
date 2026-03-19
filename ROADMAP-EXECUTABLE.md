@@ -2,7 +2,7 @@
 
 > Version cible : v1.8.4
 > Date de rédaction : 2026-03-19
-> Statut : **À faire**
+> Statut : **Phase 1 ✅ — Phase 2-5 à faire**
 
 ---
 
@@ -32,7 +32,10 @@
 - **Avantage** : préservé automatiquement lors des réinstallations / mises à jour
 
 ### Sécurité Windows
-- **Windows Defender / antivirus** : Nuitka réduit les faux positifs. Si persistance : soumettre via [Microsoft Security Intelligence](https://www.microsoft.com/en-us/wdsi/filesubmission)
+- **ESET Internet Security v19** : détecte et met en quarantaine le build Nuitka/MinGW64 (testé 19/03/2026).
+  Solution utilisateur : ajouter une exclusion sur le dossier d'installation dans ESET.
+- **Windows Defender** : bloque le post-processing Nuitka (`--windows-icon-from-ico`).
+  Contournement retenu : supprimer `--windows-icon-from-ico` du build.
 - **SmartScreen** : non résolu par Nuitka. Solution retenue = assumer + documenter ("Informations complémentaires" > "Exécuter quand même")
 - **Authenticode (signature)** : non prévu — coût 100-400€/an, hors périmètre
 
@@ -48,7 +51,7 @@
 
 ---
 
-## PHASE 1 — Correction du code source
+## PHASE 1 — Correction du code source ✅
 
 ### 1.1 — Correction des chemins (critique)
 
@@ -75,27 +78,36 @@ CONFIG_FILE = DATA_DIR / "claude_monitor_config.json"
 
 **Localisation dans le code :** classe `ConfigManager` — chercher `CONFIG_FILE` et `_HERE`.
 
-### 1.2 — Audit des chemins des ressources PNG
+### 1.2 — Audit des chemins des ressources PNG ✅
 
-Vérifier que **tous** les `CTkImage(Image.open(...))` utilisent `_HERE` ou un chemin absolu compatible `sys.frozen`. Aucun chemin relatif nu ne doit subsister.
+Tous les `CTkImage(Image.open(...))` utilisent `os.path.join(_HERE, ...)`. Aucun chemin relatif nu.
+Correction bonus : `_set_window_icon()` cherche désormais `Claude-Win-Monitor.ico` à la racine EN PREMIER
+(avant les chemins `work/` qui ne seront pas inclus dans le build Nuitka).
 
-Ressources à vérifier :
-- `Claude-Win-Monitor_ICO.png` (logo header)
-- `IMG-refresh.png`
-- `IMG-engrenage.png`
-- `IMG-power-off.png`
-- `IMG-information.png`
-- `IMG-session.png`
-- `IMG-hebdomadaire.png`
-- `IMG-portefeuille.png`
-- `Claude-Win-Monitor.ico` (icône tray)
+Ressources vérifiées à la racine :
+- `Claude-Win-Monitor_ICO.png` ✅
+- `IMG-refresh.png` ✅
+- `IMG-engrenage.png` ✅
+- `IMG-power-off.png` ✅
+- `IMG-information.png` ✅
+- `IMG-session.png` ✅
+- `IMG-hebdomadaire.png` ✅
+- `IMG-portefeuille.png` ✅
+- `Claude-Win-Monitor.ico` ✅
 
-### 1.3 — Test en mode dev post-correction
+### 1.3 — Test en mode dev post-correction ✅
 
-- Lancer `python claude_usage_monitor.py`
-- Vérifier que `%LOCALAPPDATA%\Claude-Win-Monitor\claude_monitor_config.json` est créé
-- Vérifier que tous les PNG se chargent
-- Vérifier que le port 27182 est actif
+- [x] Lancer `python claude_usage_monitor.py` → fenêtre s'ouvre normalement
+- [x] JSON créé → chemin OK (voir note ci-dessous)
+- [x] PNG / icônes visibles
+- [x] Port 27182 actif (extension peut se connecter)
+
+**Note — virtualisation Microsoft Store Python :**
+En mode dev, le JSON apparaît dans :
+`C:\Users\souli\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\Local\Claude-Win-Monitor\`
+au lieu de `C:\Users\souli\AppData\Local\Claude-Win-Monitor\`.
+C'est un artefact de l'isolation sandbox du Python Store (virtualisation FS transparente).
+**Pas de correction nécessaire** : l'exe Nuitka ne sera pas sous cette sandbox → écrira dans le bon `LOCALAPPDATA` directement.
 
 ---
 
@@ -111,24 +123,38 @@ pip install nuitka
 ### 2.2 — Commande de build
 
 ```bash
-python -m nuitka \
+# Python à utiliser : Python 3.12 de python.org (NON Store Python — incompatible avec Zig/MinGW64)
+# Chemin : C:\Users\<user>\AppData\Local\Programs\Python\Python312\python.exe
+
+python3.12 -m nuitka \
   --standalone \
   --windows-console-mode=disable \
   --enable-plugin=tk-inter \
-  --include-data-files="Claude-Win-Monitor_ICO.png=." \
-  --include-data-files="IMG-refresh.png=." \
-  --include-data-files="IMG-engrenage.png=." \
-  --include-data-files="IMG-power-off.png=." \
-  --include-data-files="IMG-information.png=." \
-  --include-data-files="IMG-session.png=." \
-  --include-data-files="IMG-hebdomadaire.png=." \
-  --include-data-files="IMG-portefeuille.png=." \
-  --include-data-files="Claude-Win-Monitor.ico=." \
-  --windows-icon-from-ico="Claude-Win-Monitor.ico" \
+  --mingw64 \
+  --lto=no \
+  --assume-yes-for-downloads \
+  --include-data-files="Claude-Win-Monitor_ICO.png=Claude-Win-Monitor_ICO.png" \
+  --include-data-files="IMG-refresh.png=IMG-refresh.png" \
+  --include-data-files="IMG-engrenage.png=IMG-engrenage.png" \
+  --include-data-files="IMG-power-off.png=IMG-power-off.png" \
+  --include-data-files="IMG-information.png=IMG-information.png" \
+  --include-data-files="IMG-session.png=IMG-session.png" \
+  --include-data-files="IMG-hebdomadaire.png=IMG-hebdomadaire.png" \
+  --include-data-files="IMG-portefeuille.png=IMG-portefeuille.png" \
+  --include-data-files="Claude-Win-Monitor.ico=Claude-Win-Monitor.ico" \
+  --include-data-dir="guide_extension=guide_extension" \
   --output-dir=build \
   --output-filename=ClaudeWinMonitor \
   claude_usage_monitor.py
 ```
+
+> **Notes post-tests (2026-03-19) :**
+> - `--windows-icon-from-ico` supprimé : Windows Defender (et ESET) bloque l'injection de ressource
+>   en post-processing. L'icône exe n'est pas critique (tray icon OK via PNG).
+> - `--lto=no` : évite le link LTO (~6 min) remplacé par link rapide (~1 min).
+> - `--mingw64` obligatoire : Zig incompatible avec Windows Store Python (erreur `selfExePath`).
+> - Python 3.12 CPython Official obligatoire (pas Store Python).
+> - `--include-data-dir="guide_extension=guide_extension"` ajouté : dossier HTML du guide requis.
 
 > Résultat attendu : `build/claude_usage_monitor.dist/ClaudeWinMonitor.exe`
 

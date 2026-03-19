@@ -40,3 +40,6 @@ nul
 
 # Claude Code (config locale)
 .claude/
+
+# Nuitka
+nuitka-crash-report.xml

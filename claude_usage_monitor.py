@@ -37,6 +37,7 @@ import time                          # sleep dans la boucle de refresh
 import json                          # config JSON
 import os                            # chemins fichiers
 import sys                           # sys.exit() à la fermeture
+from pathlib import Path             # chemins DATA_DIR (config persistante)
 import webbrowser                    # ouvrir liens externes
 import dateutil.parser               # parsing des dates ISO 8601
 from http.server import HTTPServer, BaseHTTPRequestHandler  # receiver extension
@@ -49,14 +50,21 @@ except ImportError:
     _HAVE_TRAY = False
 
 
-# Répertoire du script (chemins absolus indépendants du CWD)
-_HERE = os.path.dirname(os.path.abspath(__file__))
+# Répertoire du script (chemins absolus, compatibles Nuitka --standalone)
+if getattr(sys, "frozen", False):
+    _HERE = os.path.dirname(sys.executable)
+else:
+    _HERE = os.path.dirname(os.path.abspath(__file__))
+
+# Données persistantes dans %LOCALAPPDATA% (C:\Program Files est protégé en écriture)
+_DATA_DIR = Path(os.environ.get("LOCALAPPDATA", _HERE)) / "Claude-Win-Monitor"
+_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # ── CONSTANTES GLOBALES ──────────────────────────────────────────────────────
 
 BASE_URL             = "https://claude.ai/api"   # base des endpoints API
 REFRESH_RATE_SECONDS = 300                        # intervalle auto-refresh (5 min)
-CONFIG_FILE          = "claude_monitor_config.json"
+CONFIG_FILE          = str(_DATA_DIR / "claude_monitor_config.json")
 
 APP_NAME    = "Claude Usage Monitor"
 APP_AUTHOR  = "🅻🅶 @ IA Mastery"
@@ -134,6 +142,7 @@ class Tooltip:
         """Crée la fenêtre flottante positionnée sous (ou au-dessus) du widget."""
         self._tip = tk.Toplevel()
         self._tip.overrideredirect(True)
+        self._tip.wm_attributes("-topmost", True)
         self._tip.configure(bg="#1e1e1e")
         frame = tk.Frame(self._tip, bg="#1e1e1e",
                          highlightbackground="#484848", highlightthickness=1)
@@ -452,8 +461,7 @@ class SettingsDialog(_BaseDialog):
     def _open_guide(self):
         """Ouvre le guide HTML local dans le navigateur par défaut.
         Replie sur claude.ai si le fichier est introuvable."""
-        guide = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                             "guide_extension", "Guide d'installation.html")
+        guide = os.path.join(_HERE, "guide_extension", "Guide d'installation.html")
         if os.path.exists(guide):
             webbrowser.open(f"file:///{guide.replace(os.sep, '/')}")
         else:
@@ -690,6 +698,7 @@ class ClaudeMonitorApp(ctk.CTk):
     def _set_window_icon(self):
         """Applique l'icône .ico à la fenêtre (visible dans Alt+Tab)."""
         for fname in (
+            os.path.join(_HERE, "Claude-Win-Monitor.ico"),
             os.path.join(_HERE, "work", "Claude-Win-Monitor_ICO.ico"),
             os.path.join(_HERE, "work", "icon3.ico"),
         ):
