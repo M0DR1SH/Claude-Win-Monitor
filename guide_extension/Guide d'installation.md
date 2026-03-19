@@ -60,7 +60,7 @@ L'extension **Claude Session Helper** apparaît dans la liste.
 
 ### Étape 4 — Vérification
 
-1. Lancez **Claude-Win-Monitor** (`app.py`)
+1. Lancez **Claude Usage Monitor**
 2. Dans les secondes qui suivent, l'application reçoit automatiquement
    la clé de session et affiche vos statistiques
 3. La fenêtre **Paramètres** se ferme d'elle-même si elle s'était ouverte

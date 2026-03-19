@@ -54,6 +54,38 @@ Manifest V3. Le service worker `background.js` lit le cookie `sessionKey` sur `c
 - **Version courante** : v1.8.4 — voir `CHANGELOG.md` pour l'historique.
 - Le fichier `claude_monitor_config.json` est dans `.gitignore` (contient la session key).
 
+## Build exécutable Windows (roadmap)
+
+> Voir `ROADMAP-EXECUTABLE.md` pour la roadmap détaillée.
+
+### Décisions techniques arrêtées
+
+- **Compilateur : Nuitka** (`--standalone`) — produit un vrai binaire natif, réduit les faux positifs antivirus
+- **PyInstaller `--onefile` : rejeté** — comportement de "dropper" → détection antivirus massive
+- **Installateur : Inno Setup** — installe dans `C:\Program Files`, raccourcis, désinstallation propre
+- **Mise à jour : manuelle** — pas de mécanisme automatique ; distribution par l'auteur
+- **Extension Chrome : mode non empaqueté** — procédure "Mode développeur" documentée dans le guide
+
+### Chemin du JSON (modification obligatoire avant build)
+
+Le `CONFIG_FILE` **doit** pointer vers `%LOCALAPPDATA%\Claude-Win-Monitor\` :
+- `C:\Program Files` est protégé en écriture → "Access Denied" sans cette correction
+- Le JSON est ainsi préservé automatiquement lors des réinstallations
+
+```python
+from pathlib import Path
+import sys, os
+
+if getattr(sys, "frozen", False):
+    APP_DIR = Path(sys.executable).resolve().parent
+else:
+    APP_DIR = Path(__file__).resolve().parent
+
+DATA_DIR = Path(os.environ.get("LOCALAPPDATA", APP_DIR)) / "Claude-Win-Monitor"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+CONFIG_FILE = DATA_DIR / "claude_monitor_config.json"
+```
+
 ## UI Layout (v1.8.4+)
 
 ### Dimensionnement et géométrie
