@@ -2,7 +2,7 @@
 
 > Version cible : v1.8.4
 > Date de rédaction : 2026-03-19
-> Statut : **Phase 1 ✅ — Phase 2-5 à faire**
+> Statut : **Phase 1 ✅ Phase 2 ✅ — Phase 3 en cours (script .iss créé) — Phase 4-5 à faire**
 
 ---
 
@@ -175,34 +175,24 @@ python3.12 -m nuitka \
 
 Télécharger Inno Setup 6.x : https://jrsoftware.org/isinfo.php
 
-### 3.2 — Script `.iss` (squelette)
+### 3.2 — Script `.iss` ✅
 
-```ini
-[Setup]
-AppName=Claude Win Monitor
-AppVersion=1.8.4
-AppPublisher=M0DR1SH
-DefaultDirName={autopf}\Claude-Win-Monitor
-DefaultGroupName=Claude Win Monitor
-OutputBaseFilename=Claude-Win-Monitor-Setup
-OutputDir=dist-installer
-Compression=lzma2
-SolidCompression=yes
-PrivilegesRequired=admin
+Fichier créé : **`Claude-Win-Monitor.iss`** (racine du dépôt).
 
-[Files]
-Source: "build\claude_usage_monitor.dist\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs
+**Assets graphiques intégrés :**
+- Icône installateur : `work/Claude-Win-Monitor_ICO.ico`
+- Bannière (panneau gauche) : `work/INSTALL-bannière.bmp` (164×314 px)
+- Header (image haut droite) : `work/INSTALL-header.bmp` (497×55 px)
 
-[Icons]
-Name: "{autoprograms}\Claude Win Monitor"; Filename: "{app}\ClaudeWinMonitor.exe"
-Name: "{autodesktop}\Claude Win Monitor"; Filename: "{app}\ClaudeWinMonitor.exe"
+**Contenu installé :**
+- `build\claude_usage_monitor.dist\*` → `{app}\` (exe + DLLs + PNG + guide_extension)
+- `extension\*` → `{app}\extension\` (background.js, manifest.json, icon.png)
 
-[Run]
-Filename: "{app}\ClaudeWinMonitor.exe"; Description: "Lancer Claude Win Monitor"; Flags: nowait postinstall skipifsilent
+**Raccourcis créés :**
+- Bureau + Menu Démarrer → `ClaudeWinMonitor.exe` avec icône `.ico`
 
-; NOTE : %LOCALAPPDATA%\Claude-Win-Monitor\ n'est PAS géré par l'installateur.
-; Le JSON de configuration est préservé automatiquement lors des mises à jour.
-```
+**Pour compiler :** Ouvrir `Claude-Win-Monitor.iss` dans Inno Setup 6.x → **Build → Compile**
+Résultat : `dist-installer/Claude-Win-Monitor-Setup.exe`
 
 ### 3.3 — Tests installateur
 
