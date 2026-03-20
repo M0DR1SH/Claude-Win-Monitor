@@ -197,11 +197,39 @@ Si la connexion automatique ne fonctionne pas :
 ## 8. Icône dans la barre des tâches
 
 Claude Win Monitor s'exécute en arrière-plan avec une icône dans la zone
-de notification (coin inférieur droit). Un clic droit sur l'icône permet de :
+de notification (coin inférieur droit de l'écran).
 
-- **Afficher** — ramener la fenêtre au premier plan
-- **Actualiser** — forcer une mise à jour des quotas
-- **Quitter** — fermer l'application
+### 8.1 Icône masquée ?
+
+Windows peut masquer l'icône dans le sous-menu "^" des icônes cachées.
+Pour l'afficher en permanence :
+
+**Paramètres** → **Personnalisation** → **Barre des tâches**
+→ **Autres icônes de barre d'état système**
+→ Activez **Moniteur de quotas Claude en temps réel**
+
+### 8.2 Utilisation de l'icône
+
+- **Survol** — affiche la consommation de session en cours directement dans
+  la barre des tâches, sans ouvrir la fenêtre
+
+![Survol icône tray](survol_icone.png)
+
+- **Clic gauche** — bascule la fenêtre au premier plan
+- **Clic droit** — menu contextuel :
+  - **Afficher** — ramener la fenêtre au premier plan
+  - **Actualiser** — forcer une mise à jour des quotas
+  - **Quitter** — fermer l'application
+
+### 8.3 Garder la fenêtre au premier plan
+
+La **punaise** 📌 dans la barre de titre permet de maintenir la fenêtre
+au-dessus de toutes les autres fenêtres ouvertes.
+
+### 8.4 Textes d'aide
+
+La plupart des boutons et éléments affichent une **info-bulle** au survol
+de la souris pour expliquer leur fonction.
 
 ---
 
