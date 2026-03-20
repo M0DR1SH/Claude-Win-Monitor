@@ -54,37 +54,68 @@ Manifest V3. Le service worker `background.js` lit le cookie `sessionKey` sur `c
 - **Version courante** : v1.8.4 — voir `CHANGELOG.md` pour l'historique.
 - Le fichier `claude_monitor_config.json` est dans `.gitignore` (contient la session key).
 
-## Build exécutable Windows (roadmap)
+## Build exécutable Windows
 
-> Voir `ROADMAP-EXECUTABLE.md` pour la roadmap détaillée.
+> Voir `ROADMAP-EXECUTABLE.md` pour la roadmap complète.
+> **Statut : Phases 1 ✅ 2 ✅ 3 ✅ — Phases 4-5 à faire (ZIP + guide)**
+
+### État courant (20/03/2026)
+
+- **`build/claude_usage_monitor.dist/ClaudeWinMonitor.exe`** — build Nuitka validé (~23 MB)
+- **`dist-installer/Claude-Win-Monitor-Setup.exe`** — installateur Inno Setup validé (~16 MB)
+- **`Claude-Win-Monitor.iss`** — script Inno Setup à la racine du dépôt
+
+### Commande de build Nuitka (production)
+
+```bash
+# Depuis la racine du projet — Python 3.12 CPython obligatoire (pas Store Python)
+"C:\Users\souli\AppData\Local\Programs\Python\Python312\python.exe" -m nuitka \
+  --standalone \
+  --windows-console-mode=disable \
+  --enable-plugin=tk-inter \
+  --mingw64 \
+  --lto=no \
+  --assume-yes-for-downloads \
+  --include-data-files="Claude-Win-Monitor_ICO.png=Claude-Win-Monitor_ICO.png" \
+  --include-data-files="IMG-refresh.png=IMG-refresh.png" \
+  --include-data-files="IMG-engrenage.png=IMG-engrenage.png" \
+  --include-data-files="IMG-power-off.png=IMG-power-off.png" \
+  --include-data-files="IMG-information.png=IMG-information.png" \
+  --include-data-files="IMG-session.png=IMG-session.png" \
+  --include-data-files="IMG-hebdomadaire.png=IMG-hebdomadaire.png" \
+  --include-data-files="IMG-portefeuille.png=IMG-portefeuille.png" \
+  --include-data-files="Claude-Win-Monitor.ico=Claude-Win-Monitor.ico" \
+  --include-data-dir="guide_extension=guide_extension" \
+  --output-dir=build \
+  --output-filename=ClaudeWinMonitor \
+  claude_usage_monitor.py
+```
+
+> **IMPORTANT avant tout rebuild :** ajouter une exclusion ESET sur `build\` et `dist-installer\`
+> (ESET met en quarantaine les fichiers du dist après compilation).
+
+### Commande Inno Setup
+
+Ouvrir `Claude-Win-Monitor.iss` → **Build → Compile** (`F9`).
 
 ### Décisions techniques arrêtées
 
-- **Compilateur : Nuitka** (`--standalone`) — produit un vrai binaire natif, réduit les faux positifs antivirus
-- **PyInstaller `--onefile` : rejeté** — comportement de "dropper" → détection antivirus massive
-- **Installateur : Inno Setup** — installe dans `C:\Program Files`, raccourcis, désinstallation propre
-- **Mise à jour : manuelle** — pas de mécanisme automatique ; distribution par l'auteur
-- **Extension Chrome : mode non empaqueté** — procédure "Mode développeur" documentée dans le guide
+- **Compilateur : Nuitka** (`--standalone`) — binaire natif, réduit les faux positifs antivirus
+- **PyInstaller `--onefile` : rejeté** — comportement "dropper" → détection antivirus massive
+- **`--windows-icon-from-ico` : supprimé** — Windows Defender bloque le post-processing
+- **`--lto=no`** — link ~1 min au lieu de 6+ min, contourne blocage Defender
+- **`--mingw64` + Python 3.12 CPython** — Zig incompatible avec Windows Store Python
+- **Installateur : Inno Setup** — `C:\Program Files (x86)\Claude-Win-Monitor`, raccourcis, icône
+- **JSON config : `%LOCALAPPDATA%\Claude-Win-Monitor\`** — préservé lors des mises à jour
+- **Extension Chrome + PDF/MD guide** : exclus de l'installateur, distribués dans l'archive ZIP
+- **Authenticode (signature)** : non prévu — hors périmètre
 
-### Chemin du JSON (modification obligatoire avant build)
+### Prochaines étapes
 
-Le `CONFIG_FILE` **doit** pointer vers `%LOCALAPPDATA%\Claude-Win-Monitor\` :
-- `C:\Program Files` est protégé en écriture → "Access Denied" sans cette correction
-- Le JSON est ainsi préservé automatiquement lors des réinstallations
-
-```python
-from pathlib import Path
-import sys, os
-
-if getattr(sys, "frozen", False):
-    APP_DIR = Path(sys.executable).resolve().parent
-else:
-    APP_DIR = Path(__file__).resolve().parent
-
-DATA_DIR = Path(os.environ.get("LOCALAPPDATA", APP_DIR)) / "Claude-Win-Monitor"
-DATA_DIR.mkdir(parents=True, exist_ok=True)
-CONFIG_FILE = DATA_DIR / "claude_monitor_config.json"
-```
+1. Scan VirusTotal de `Claude-Win-Monitor-Setup.exe`
+2. Phase 5 — Guide d'installation illustré (PDF + Markdown)
+3. Phase 4 — Archive ZIP + `SHA256SUMS.txt`
+4. GitHub Release v1.8.4
 
 ## UI Layout (v1.8.4+)
 
