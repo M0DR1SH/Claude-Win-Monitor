@@ -76,6 +76,12 @@ Manifest V3. Le service worker `background.js` lit le cookie `sessionKey` sur `c
   --mingw64 \
   --lto=no \
   --assume-yes-for-downloads \
+  --company-name="Laurent Gérard" \
+  --product-name="Claude Win Monitor" \
+  --file-version="1.8.4.0" \
+  --product-version="1.8.4.0" \
+  --file-description="Moniteur de quotas Claude en temps réel" \
+  --copyright="© 2026 Laurent Gérard" \
   --include-data-files="Claude-Win-Monitor_ICO.png=Claude-Win-Monitor_ICO.png" \
   --include-data-files="IMG-refresh.png=IMG-refresh.png" \
   --include-data-files="IMG-engrenage.png=IMG-engrenage.png" \
