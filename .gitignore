@@ -43,3 +43,6 @@ nul
 
 # Nuitka
 nuitka-crash-report.xml
+
+# Build et distribution (binaires générés)
+dist-installer/

@@ -5,7 +5,7 @@
 
 #define AppName    "Claude Win Monitor"
 #define AppVersion "1.8.4"
-#define AppPublisher "M0DR1SH"
+#define AppPublisher "Laurent Gérard"
 #define AppExeName "ClaudeWinMonitor.exe"
 #define SourceDist "build\claude_usage_monitor.dist"
 
@@ -27,13 +27,13 @@ PrivilegesRequired=admin
 SetupIconFile=work\Claude-Win-Monitor_ICO.ico
 
 ; Assets graphiques
-WizardImageFile=work\INSTALL-bannière.bmp
-WizardSmallImageFile=work\INSTALL-header.bmp
+WizardImageFile=work\INSTALL-bannière.png
+WizardSmallImageFile=work\INSTALL-header.png
 WizardStyle=modern
 
 ; Désinstallation
 UninstallDisplayName={#AppName}
-UninstallDisplayIcon={app}\{#AppExeName}
+UninstallDisplayIcon={app}\Claude-Win-Monitor.ico
 
 ; Infos Windows Add/Remove Programs
 VersionInfoVersion={#AppVersion}
@@ -45,21 +45,23 @@ Name: "french"; MessagesFile: "compiler:Languages\French.isl"
 
 [Files]
 ; Contenu du build Nuitka (exe + DLLs + ressources)
-Source: "{#SourceDist}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs
+; Exclure PDF et MD du guide : ces fichiers sont distribués séparément dans l'archive ZIP
+Source: "{#SourceDist}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs; \
+  Excludes: "guide_extension\Guide d'installation.pdf,guide_extension\Guide d'installation.md"
 
-; Extension Chrome (copiée dans le dossier d'installation pour que l'utilisateur puisse la charger)
-Source: "extension\*"; DestDir: "{app}\extension"; Flags: recursesubdirs createallsubdirs
+; Icône pour les raccourcis (l'exe n'a pas d'icône intégrée — Defender bloquait --windows-icon-from-ico)
+Source: "work\Claude-Win-Monitor_ICO.ico"; DestDir: "{app}"; DestName: "Claude-Win-Monitor.ico"
 
-; Guide d'installation HTML (inclus dans le dist via Nuitka, mais aussi disponible hors-app)
-; Source: "guide_extension\*"; DestDir: "{app}\guide_extension"; Flags: recursesubdirs createallsubdirs
+; NOTE : l'extension Chrome et le guide sont distribués séparément dans l'archive ZIP,
+; pas inclus dans l'installateur.
 
 [Icons]
 ; Menu Démarrer
-Name: "{group}\{#AppName}";       Filename: "{app}\{#AppExeName}"; IconFilename: "{app}\Claude-Win-Monitor.ico"
+Name: "{group}\{#AppName}";              Filename: "{app}\{#AppExeName}"; IconFilename: "{app}\Claude-Win-Monitor.ico"
 Name: "{group}\Désinstaller {#AppName}"; Filename: "{uninstallexe}"
 
 ; Bureau
-Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExeName}"; IconFilename: "{app}\Claude-Win-Monitor.ico"
+Name: "{autodesktop}\{#AppName}";        Filename: "{app}\{#AppExeName}"; IconFilename: "{app}\Claude-Win-Monitor.ico"
 
 [Run]
 ; Proposer de lancer l'app après installation
@@ -68,15 +70,5 @@ Filename: "{app}\{#AppExeName}"; \
   Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
-; Nettoyer uniquement le répertoire d'installation
 ; IMPORTANT : %LOCALAPPDATA%\Claude-Win-Monitor\ (JSON de config) n'est PAS supprimé
 ; → la configuration utilisateur est préservée lors des réinstallations / mises à jour
-
-[Code]
-// Vérification : avertir si une version précédente est déjà installée
-procedure CurStepChanged(CurStep: TSetupStep);
-begin
-  if CurStep = ssInstall then begin
-    // Rien à faire — Inno Setup gère automatiquement l'écrasement des fichiers
-  end;
-end;

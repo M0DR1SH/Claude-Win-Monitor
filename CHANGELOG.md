@@ -1,6 +1,54 @@
 # CHANGELOG — Claude-Win-Monitor
 
-## v1.8.4 — 18/03/2026
+## v1.8.4 — build exécutable Windows — 20/03/2026
+
+### Packaging (Phases 1–3)
+
+#### Phase 1 — Corrections code source
+
+- **`CONFIG_FILE`** : déplacé vers `%LOCALAPPDATA%\Claude-Win-Monitor\claude_monitor_config.json`
+  via `_DATA_DIR` (évite "Access Denied" dans `C:\Program Files` protégé en écriture)
+- **`sys.frozen`** : détection mode Nuitka compilé vs mode dev pour `_HERE` et `_DATA_DIR`
+- **`_set_window_icon`** : priorité au `.ico` racine avant les chemins `work/` (non inclus dans le build)
+- **`_open_guide`** : utilise `_HERE` au lieu de `__file__` (fix chemin en mode compilé)
+- **`Tooltip._show`** : `wm_attributes("-topmost", True)` — tooltips visibles au-dessus de la fenêtre épinglée
+
+#### Phase 2 — Build Nuitka
+
+Commande retenue : `--standalone --windows-console-mode=disable --enable-plugin=tk-inter --mingw64 --lto=no`
+
+**Problèmes rencontrés et résolus :**
+- `--include-data-files` : format `source=destination` requis (pas `source=.`)
+- Zig `selfExePath: FileNotFound` : Windows Store Python 3.13 incompatible → Python 3.12 CPython official + `--mingw64`
+- `--windows-icon-from-ico` : bloqué par Windows Defender en post-processing → supprimé
+- `--lto=yes` (défaut) : build >6 min + blocage Defender → `--lto=no`
+- `guide_extension/` manquant du dist → ajout `--include-data-dir="guide_extension=guide_extension"`
+- ESET met en quarantaine le dist après build → ajouter exclusion sur `build/` avant de compiler
+
+Résultat : `build/claude_usage_monitor.dist/ClaudeWinMonitor.exe` — ~23 MB, 983 fichiers
+
+#### Phase 3 — Installateur Inno Setup
+
+Script : **`Claude-Win-Monitor.iss`** (racine du dépôt)
+
+**Assets graphiques :** bannière 164×314 (`work/INSTALL-bannière.png`), header (`work/INSTALL-header.png`), icône `.ico`
+
+**Corrections apportées au script :**
+- Icône raccourcis : `.ico` copié séparément dans `{app}` (exe sans icône intégrée, Defender bloquait `--windows-icon-from-ico`)
+- `UninstallDisplayIcon` → pointe vers `{app}\Claude-Win-Monitor.ico` (pas l'exe) → icône visible dans Paramètres → Applications
+- Extension Chrome et PDF/MD du guide exclus de l'installateur → distribués séparément dans l'archive ZIP
+- `--windows-console-mode=force` utilisé temporairement pour diagnostiquer silences au lancement → production = `disable`
+
+**Validé :**
+- Installation `C:\Program Files (x86)\Claude-Win-Monitor`
+- Raccourcis Bureau + Menu Démarrer avec icône
+- Icône dans Paramètres → Applications installées (v1.8.4 | Laurent Gérard | 58,7 Mo)
+- JSON `%LOCALAPPDATA%\Claude-Win-Monitor\` préservé lors désinstallation/réinstallation
+- Toutes les fonctions de l'app opérationnelles depuis l'exe installé
+
+---
+
+## v1.8.4 — UI Layout — 18/03/2026
 
 ### UI Layout refactorisé (corrections exhaustives)
 

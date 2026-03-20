@@ -1,8 +1,8 @@
 # ROADMAP — Claude-Win-Monitor : Build Exécutable Windows
 
 > Version cible : v1.8.4
-> Date de rédaction : 2026-03-19
-> Statut : **Phase 1 ✅ Phase 2 ✅ — Phase 3 en cours (script .iss créé) — Phase 4-5 à faire**
+> Date de rédaction : 2026-03-19 — Mis à jour : 2026-03-20
+> Statut : **Phase 1 ✅ Phase 2 ✅ Phase 3 ✅ — Phase 4-5 à faire**
 
 ---
 
@@ -158,14 +158,18 @@ python3.12 -m nuitka \
 
 > Résultat attendu : `build/claude_usage_monitor.dist/ClaudeWinMonitor.exe`
 
-### 2.3 — Tests post-build
+### 2.3 — Tests post-build ✅
 
-- [ ] Fenêtre s'ouvre correctement (380×592)
-- [ ] PNG / icônes visibles
-- [ ] JSON créé dans `%LOCALAPPDATA%\Claude-Win-Monitor\`
-- [ ] Port 27182 actif (`netstat -an | findstr 27182`)
-- [ ] Tray icon fonctionnel
-- [ ] Scan Windows Defender → pas de quarantaine
+- [x] Fenêtre s'ouvre correctement (380×592)
+- [x] PNG / icônes visibles
+- [x] JSON créé dans `%LOCALAPPDATA%\Claude-Win-Monitor\`
+- [x] Port 27182 actif
+- [x] Tray icon fonctionnel
+- [x] Toutes les fonctions opérationnelles (session key, stats, boutons)
+
+> **Note antivirus :** ESET met en quarantaine les fichiers du dist après le build.
+> **Avant tout rebuild**, ajouter une exclusion ESET sur `build\` et `dist-installer\`.
+> Procédure : ESET → Configuration → Exclusions → ajouter les deux dossiers.
 
 ---
 
@@ -194,18 +198,49 @@ Fichier créé : **`Claude-Win-Monitor.iss`** (racine du dépôt).
 **Pour compiler :** Ouvrir `Claude-Win-Monitor.iss` dans Inno Setup 6.x → **Build → Compile**
 Résultat : `dist-installer/Claude-Win-Monitor-Setup.exe`
 
-### 3.3 — Tests installateur
+### 3.3 — Tests installateur ✅
 
-- [ ] Installation complète (chemin par défaut)
-- [ ] Raccourcis Bureau + Menu Démarrer créés
-- [ ] Application se lance depuis le raccourci
-- [ ] JSON créé dans `%LOCALAPPDATA%\Claude-Win-Monitor\` au premier lancement
-- [ ] Test de mise à jour simulée : réinstaller → JSON préservé
-- [ ] Test de désinstallation : `Program Files` nettoyé, JSON intact
+- [x] Installation complète (`C:\Program Files (x86)\Claude-Win-Monitor`)
+- [x] Raccourcis Bureau + Menu Démarrer créés avec icône
+- [x] Application se lance depuis le raccourci (sans fenêtre terminal)
+- [x] Icône visible dans Paramètres → Applications (v1.8.4 | Laurent Gérard | 58,7 Mo)
+- [x] JSON `%LOCALAPPDATA%\Claude-Win-Monitor\` préservé lors désinstallation/réinstallation
+- [x] Désinstallation propre via Paramètres → Applications
+- [x] Toutes les fonctions de l'app opérationnelles depuis l'exe installé
+
+**Corrections apportées pendant les tests :**
+- `UninstallDisplayIcon` : pointe vers `.ico` (pas l'exe sans icône intégrée)
+- Extension Chrome + PDF/MD du guide : exclus de l'installateur (archive ZIP séparée)
+- Assets : `.png` utilisés à la place de `.bmp` (Inno Setup 6 supporte PNG nativement)
+- `AppPublisher` : "Laurent Gérard"
 
 ---
 
-## PHASE 4 — Structure du livrable ZIP
+## PHASE 4 — Livrable ZIP + Validation
+
+### 4.1 — Scan antivirus (VirusTotal)
+
+Avant distribution, soumettre `Claude-Win-Monitor-Setup.exe` à **VirusTotal** :
+1. Aller sur https://www.virustotal.com → onglet **File**
+2. Glisser-déposer `dist-installer\Claude-Win-Monitor-Setup.exe`
+3. Conserver l'URL du rapport → à inclure dans le README
+
+> Faux positifs attendus (binaire Nuitka/MinGW64 non signé). L'URL VirusTotal permet
+> aux utilisateurs méfiants de vérifier par eux-mêmes.
+
+### 4.2 — Checksums SHA-256
+
+Générer après constitution de l'archive ZIP :
+
+```bash
+certutil -hashfile dist-installer\Claude-Win-Monitor-Setup.exe SHA256
+certutil -hashfile Claude-Win-Monitor-v1.8.4.zip SHA256
+```
+
+> MD5 est obsolète cryptographiquement (cassé depuis 2004). SHA-256 est le standard actuel.
+> Inclure un fichier `SHA256SUMS.txt` dans l'archive et dans la GitHub Release.
+
+### 4.3 — Structure du livrable ZIP
 
 ```text
 Claude-Win-Monitor-v1.8.4.zip
@@ -214,11 +249,12 @@ Claude-Win-Monitor-v1.8.4.zip
 ├── 2-Extension-Chrome/
 │   ├── manifest.json
 │   ├── background.js
-│   └── (autres fichiers de l'extension)
+│   └── icon.png
 ├── 3-Documentation/
 │   ├── Guide-Installation.pdf
 │   ├── Guide-Installation.md
 │   └── 00-LISEZ-MOI.txt
+├── SHA256SUMS.txt
 └── VERSION.txt
 ```
 
@@ -228,13 +264,18 @@ Claude Win Monitor v1.8.4
 =========================
 ÉTAPES D'INSTALLATION :
 
-1. Lancer : 1-Installateur/Claude-Win-Monitor-Setup.exe
+1. Désactiver temporairement votre antivirus pendant l'installation
+   (faux positifs sur les binaires compilés non signés — voir README)
+
+2. Lancer : 1-Installateur/Claude-Win-Monitor-Setup.exe
    → Si Windows affiche "Windows a protégé votre ordinateur" :
      cliquer "Informations complémentaires" puis "Exécuter quand même"
 
-2. Suivre le guide : 3-Documentation/Guide-Installation.pdf
+3. Réactiver votre antivirus et ajouter une exclusion sur le dossier d'installation
 
-3. Installer l'extension Chrome (procédure dans le guide, section 4)
+4. Suivre le guide : 3-Documentation/Guide-Installation.pdf
+
+5. Installer l'extension Chrome (procédure dans le guide, section 4)
 ```
 
 ---
@@ -259,8 +300,11 @@ Claude Win Monitor v1.8.4
 ## ORDRE D'EXÉCUTION
 
 ```
-Phase 1 (code) → Phase 2 (Nuitka build) → Phase 3 (Inno Setup) → Phase 4 (ZIP) → Phase 5 (guide)
-     ↑                    ↑
-  itérer si            itérer si
-  bug chemin           bug build
+Phase 1 ✅  →  Phase 2 ✅  →  Phase 3 ✅  →  Phase 4 (scan AV + ZIP)  →  Phase 5 (guide)
 ```
+
+**Prochaines étapes :**
+1. Soumettre `Claude-Win-Monitor-Setup.exe` à VirusTotal
+2. Rédiger le guide d'installation (Phase 5)
+3. Constituer l'archive ZIP avec checksums SHA-256
+4. Publier la GitHub Release v1.8.4
