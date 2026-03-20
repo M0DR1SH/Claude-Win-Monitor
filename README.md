@@ -18,6 +18,8 @@ Affiche la consommation de session (5h), hebdomadaire (7j) et le budget mensuel.
 L'exécutable est compilé avec **Nuitka** (Python → binaire natif C). Malgré cela, certains antivirus
 le détectent par erreur (heuristique générique sur les binaires compilés depuis Python).
 
+**Scan VirusTotal du Setup (0/71) :** https://www.virustotal.com/gui/file/37ee2d1c23e8b1514540e28a50d99416b6fa060807907cbec77a624f22f88f9f/
+
 ### Windows Defender / SmartScreen
 - **SmartScreen** : message "Windows a protégé votre ordinateur" au premier lancement.
   → Cliquer **Informations complémentaires** puis **Exécuter quand même**.

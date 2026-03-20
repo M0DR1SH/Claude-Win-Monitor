@@ -224,15 +224,29 @@ Résultat : `dist-installer/Claude-Win-Monitor-Setup.exe`
 
 ## PHASE 4 — Livrable ZIP + Validation
 
-### 4.1 — Scan antivirus (VirusTotal)
+### 4.1 — Scan antivirus (VirusTotal) ✅
 
-Avant distribution, soumettre `Claude-Win-Monitor-Setup.exe` à **VirusTotal** :
-1. Aller sur https://www.virustotal.com → onglet **File**
-2. Glisser-déposer `dist-installer\Claude-Win-Monitor-Setup.exe`
-3. Conserver l'URL du rapport → à inclure dans le README
+**Résultats (20/03/2026) :**
 
-> Faux positifs attendus (binaire Nuitka/MinGW64 non signé). L'URL VirusTotal permet
-> aux utilisateurs méfiants de vérifier par eux-mêmes.
+| Fichier | Score | SHA-256 |
+|---------|-------|---------|
+| `ClaudeWinMonitor.exe` (sans métadonnées) | 6/71 | e73b5c6b... |
+| `ClaudeWinMonitor.exe` (avec métadonnées PE) | 2/69 | c1cf5cfe... |
+| `Claude-Win-Monitor-Setup.exe` | **0/71** ✅ | 37ee2d1c... |
+
+**Métadonnées PE ajoutées au build Nuitka** (`--company-name`, `--product-name`, `--file-version`, `--product-version`, `--file-description`, `--copyright`) → ont éliminé 4 détections heuristiques (Microsoft, Elastic, CrowdStrike, Symantec).
+
+**Détections résiduelles sur l'exe (2/69) :**
+- ESET-NOD32 : `Python/Packed.Nuitka_AGen` — signature générique Nuitka
+- Bkav Pro : `W64.AIDetectMalware` — ML peu fiable, impact négligeable
+
+**Soumissions faux positifs envoyées (20/03/2026) :**
+- `samples@eset.com` — correction détection actuelle
+- `whitelist@eset.sk` — whitelisting éditeur (versions futures)
+- Accusés de réception obtenus pour les deux
+
+> Le livrable de distribution (`Claude-Win-Monitor-Setup.exe`) est **0/71**.
+> L'URL VirusTotal du Setup peut être incluse dans le README pour rassurer les utilisateurs.
 
 ### 4.2 — Checksums SHA-256
 
