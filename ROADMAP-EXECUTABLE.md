@@ -264,16 +264,15 @@ certutil -hashfile Claude-Win-Monitor-v1.8.4.zip SHA256
 
 ```text
 Claude-Win-Monitor-v1.8.4.zip
+├── Claude-Win-Monitor-Setup.exe   ← à la racine pour accès immédiat
+├── Guide-Installation.pdf         ← à la racine pour accès immédiat
+├── 00-LISEZ-MOI.txt               ← à la racine pour accès immédiat
 ├── 1-Installateur/
 │   └── Claude-Win-Monitor-Setup.exe
 ├── 2-Extension-Chrome/
 │   ├── manifest.json
 │   ├── background.js
 │   └── icon.png
-├── 3-Documentation/
-│   ├── Guide-Installation.pdf
-│   ├── Guide-Installation.md
-│   └── 00-LISEZ-MOI.txt
 ├── SHA256SUMS.txt
 └── VERSION.txt
 ```

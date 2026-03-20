@@ -53,6 +53,7 @@ Manifest V3. Le service worker `background.js` lit le cookie `sessionKey` sur `c
 - **Langue** : interface et code en français. Maintenir cette convention.
 - **Version courante** : v1.8.4 — voir `CHANGELOG.md` pour l'historique.
 - Le fichier `claude_monitor_config.json` est dans `.gitignore` (contient la session key).
+- **Comportement JSON** : la configuration est chargée en mémoire au démarrage via `ConfigManager`. Supprimer le fichier JSON à chaud n'a aucun effet immédiat — l'app continue de fonctionner avec la config en mémoire jusqu'à la fermeture. **Un redémarrage de l'application est nécessaire** pour que la suppression soit prise en compte.
 
 ## Build exécutable Windows
 

@@ -1,4 +1,4 @@
-# Guide d'installation — Claude Win Monitor v1.8.4
+# Guide d'installation — 🅻🅶's Claude Win Monitor v1.8.4
 
 **Claude Win Monitor** est un moniteur de quotas Claude en temps réel pour Windows.
 Il affiche votre consommation de session (5h), hebdomadaire (7 jours) et votre budget mensuel.
@@ -9,30 +9,34 @@ Il affiche votre consommation de session (5h), hebdomadaire (7 jours) et votre b
 
 - **Windows 10 ou Windows 11** (64 bits)
 - Un navigateur **compatible Chrome** : Google Chrome, Microsoft Edge, Arc, Brave…
-  (nécessaire pour l'installation de l'extension qui envoie automatiquement la clé de session)
+  (nécessaire pour l'installation de l'extension automatique — voir section 6)
   Sans navigateur compatible, la clé de session devra être saisie manuellement.
 - Un compte **Claude.ai** actif (abonnement Pro ou Team)
 
-Aucune installation de Python ou d'autre logiciel n'est nécessaire.
+**Aucune installation de Python ou d'autre logiciel n'est nécessaire.**
+L'application est autonome : elle embarque tout ce dont elle a besoin (~59 Mo installés).
 
 ---
 
 ## 2. Contenu de l'archive
 
-L'archive `Claude-Win-Monitor-v1.8.4.zip` contient trois dossiers :
+L'archive `Claude-Win-Monitor-v1.8.4.zip` contient :
 
 ```
+Claude-Win-Monitor-Setup.exe   ← programme d'installation (16 Mo)
+Guide-Installation.pdf         ← ce guide
+00-LISEZ-MOI.txt               ← démarrage rapide
+
 1-Installateur/
-    Claude-Win-Monitor-Setup.exe   ← programme d'installation
+    Claude-Win-Monitor-Setup.exe
 
 2-Extension-Chrome/
     manifest.json
     background.js
-    icon.png                       ← extension navigateur
+    icon.png                   ← extension navigateur
 
-3-Documentation/
-    Guide-Installation.pdf         ← ce guide
-    00-LISEZ-MOI.txt
+SHA256SUMS.txt
+VERSION.txt
 ```
 
 ---
@@ -55,7 +59,7 @@ d'installation (voir section 5).
 
 ### 4.1 Lancer l'installateur
 
-Dans le dossier `1-Installateur`, double-cliquez sur `Claude-Win-Monitor-Setup.exe`.
+Double-cliquez sur `Claude-Win-Monitor-Setup.exe` (taille : **16,4 Mo**).
 
 En survolant le fichier, vous pouvez vérifier ses métadonnées :
 **Description :** Claude Win Monitor Setup — **Entreprise :** Laurent Gérard — **Version :** 1.8.4.0
@@ -79,10 +83,17 @@ Windows peut afficher un écran bleu **"Windows a protégé votre ordinateur"**.
 
 ### 4.3 Étapes de l'assistant d'installation
 
+> Les **zones en bleu** dans les captures ci-dessous indiquent des éléments
+> **optionnels** que vous pouvez modifier si vous le souhaitez.
+> Les **flèches rouges** indiquent le bouton à cliquer pour continuer.
+
+---
+
 **Étape 1 — Dossier de destination**
 
-Le dossier proposé par défaut est `C:\Program Files (x86)\Claude-Win-Monitor`.
-Cliquez sur **Suivant**.
+Le dossier proposé par défaut est `C:\Program Files (x86)\Claude-Win-Monitor`
+(espace requis : ~59 Mo). Vous pouvez le modifier via **Parcourir**.
+Cliquez sur **Suivant** ①.
 
 ![Dossier de destination](install01.png)
 
@@ -90,8 +101,8 @@ Cliquez sur **Suivant**.
 
 **Étape 2 — Dossier du menu Démarrer**
 
-L'assistant créera un raccourci **Claude Win Monitor** dans le menu Démarrer.
-Cliquez sur **Suivant**.
+L'assistant créera un raccourci dans le menu Démarrer sous le nom **Claude Win Monitor**.
+Vous pouvez modifier ce nom. Cliquez sur **Suivant** ①.
 
 ![Menu Démarrer](install02.png)
 
@@ -99,7 +110,7 @@ Cliquez sur **Suivant**.
 
 **Étape 3 — Prêt à installer**
 
-Vérifiez le récapitulatif et cliquez sur **Installer**.
+Vérifiez le récapitulatif et cliquez sur **Installer** ①.
 
 ![Prêt à installer](install03.png)
 
@@ -108,7 +119,7 @@ Vérifiez le récapitulatif et cliquez sur **Installer**.
 **Étape 4 — Fin de l'installation**
 
 L'installation est terminée. Laissez la case **Lancer Claude Win Monitor** cochée
-et cliquez sur **Terminer**.
+et cliquez sur **Terminer** ①.
 
 ![Fin de l'installation](install04.png)
 
@@ -132,8 +143,17 @@ Claude Win Monitor est maintenant visible dans **Paramètres → Applications in
 
 ## 6. Installation de l'extension navigateur
 
-L'extension envoie automatiquement votre clé de session à l'application.
-Sans elle, vous devrez saisir la clé manuellement via Paramètres ⚙.
+### Pourquoi cette extension ?
+
+Pour afficher vos statistiques, Claude Win Monitor a besoin de vos **identifiants
+de session Anthropic** (une clé temporaire que Claude.ai génère à chaque connexion).
+
+**L'extension récupère automatiquement cette clé** depuis votre navigateur et la
+transmet à l'application — sans aucune intervention de votre part.
+
+C'est la méthode la plus simple. Si vous préférez ne pas installer d'extension,
+vous pouvez saisir la clé manuellement via le bouton **Paramètres** ⚙ de l'application
+(procédure détaillée dans la fenêtre Paramètres).
 
 ### 6.1 Ouvrir la gestion des extensions
 
@@ -191,6 +211,17 @@ Si la connexion automatique ne fonctionne pas :
 1. Cliquez sur l'icône **Paramètres** ⚙ (barre du bas)
 2. Suivez les instructions pour récupérer votre clé de session manuellement
    depuis les outils de développement du navigateur (F12)
+
+### 7.3 Réinitialisation de la configuration
+
+La configuration (clé de session) est enregistrée dans :
+`C:\Users\[votre nom]\AppData\Local\Claude-Win-Monitor\claude_monitor_config.json`
+
+> **Important :** si vous supprimez ce fichier, les statistiques continueront
+> de s'afficher jusqu'à la prochaine fermeture de l'application (la configuration
+> est chargée en mémoire au démarrage). **Relancez l'application** pour que la
+> suppression soit prise en compte — l'assistant de configuration s'ouvrira alors
+> automatiquement.
 
 ---
 
@@ -265,4 +296,4 @@ Code source : https://github.com/M0DR1SH/Claude-Win-Monitor
 
 ---
 
-*Claude Win Monitor v1.8.4 — Laurent Gérard — 2026*
+*🅻🅶's Claude Win Monitor v1.8.4 — Laurent Gérard — 2026*
