@@ -1,6 +1,6 @@
 # CHANGELOG — Claude-Win-Monitor
 
-## v1.8.4 — build exécutable Windows — 20/03/2026
+## v1.8.4 — build exécutable Windows — 19-20/03/2026
 
 ### Packaging (Phases 1–3)
 
@@ -45,6 +45,28 @@ Script : **`Claude-Win-Monitor.iss`** (racine du dépôt)
 - Icône dans Paramètres → Applications installées (v1.8.4 | Laurent Gérard | 58,7 Mo)
 - JSON `%LOCALAPPDATA%\Claude-Win-Monitor\` préservé lors désinstallation/réinstallation
 - Toutes les fonctions de l'app opérationnelles depuis l'exe installé
+
+#### Phase 4 — VirusTotal + soumissions antivirus
+
+- **Métadonnées PE** (`--company-name`, `--product-name`, `--file-version`, `--product-version`, `--file-description`, `--copyright`) ajoutées au build Nuitka → 6/71 réduit à 2/69
+- **Setup.exe : 0/71** (VirusTotal) — SHA-256 : `37ee2d1c...` — lien ajouté au README
+- **Soumissions faux positifs ESET** : `samples@eset.com` (correction immédiate) + `whitelist@eset.sk` (whitelisting éditeur versions futures) — accusés de réception obtenus
+- ESET local (moteur 32868/20260319) : **0 détection** sur l'exe installé
+
+#### Phase 5 — Guide d'installation
+
+**Fichier :** `guide_installation/Guide-Installation.md`
+
+Guide illustré en français pour utilisateurs non techniques, 10 sections :
+- Prérequis, antivirus (désactiver + exclusion), SmartScreen, installation pas à pas
+- Extension navigateur compatible Chrome (Arc, Edge, Brave, Chrome)
+- Premier lancement, connexion automatique, affichage quotas
+- Icône tray : icône masquée (Paramètres Personnalisation), survol Session%,
+  clic gauche, punaise premier plan, info-bulles
+- Mise à jour (config préservée), désinstallation
+
+**Images intégrées :** install00–06/09/10, extension01–03, survol_icone (13 captures)
+**PDF :** à générer (Typora ou impression navigateur)
 
 ---
 
