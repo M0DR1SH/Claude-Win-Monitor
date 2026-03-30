@@ -1,10 +1,10 @@
 ; ============================================================
 ; Claude Win Monitor — Script Inno Setup
-; Version : 1.8.4
+; Version : 1.9.1
 ; ============================================================
 
 #define AppName    "Claude Win Monitor"
-#define AppVersion "1.8.4"
+#define AppVersion "1.9.1"
 #define AppPublisher "Laurent Gérard"
 #define AppExeName "ClaudeWinMonitor.exe"
 #define SourceDist "build\claude_usage_monitor.dist"
@@ -45,9 +45,8 @@ Name: "french"; MessagesFile: "compiler:Languages\French.isl"
 
 [Files]
 ; Contenu du build Nuitka (exe + DLLs + ressources)
-; Exclure PDF et MD du guide : ces fichiers sont distribués séparément dans l'archive ZIP
-Source: "{#SourceDist}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs; \
-  Excludes: "guide_extension\Guide d'installation.pdf,guide_extension\Guide d'installation.md"
+; guide_installation/ est inclus dans le dist (contient 01-INSTALLATION.html + images)
+Source: "{#SourceDist}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs
 
 ; Icône pour les raccourcis (l'exe n'a pas d'icône intégrée — Defender bloquait --windows-icon-from-ico)
 Source: "work\Claude-Win-Monitor_ICO.ico"; DestDir: "{app}"; DestName: "Claude-Win-Monitor.ico"

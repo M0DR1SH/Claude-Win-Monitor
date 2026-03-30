@@ -51,16 +51,16 @@ Manifest V3. Le service worker `background.js` lit le cookie `sessionKey` sur `c
 - **Pas de tests automatisés.** Le dossier `work/` contient des scripts de développement/expérimentation (non productifs).
 - **`pystray` est optionnel** — l'app dégrade gracieusement si absent (pas de tray).
 - **Langue** : interface et code en français. Maintenir cette convention.
-- **Version courante** : v1.8.4 — voir `CHANGELOG.md` pour l'historique.
+- **Version courante** : v1.9.1 — voir `CHANGELOG.md` pour l'historique.
 - Le fichier `claude_monitor_config.json` est dans `.gitignore` (contient la session key).
 - **Comportement JSON** : la configuration est chargée en mémoire au démarrage via `ConfigManager`. Supprimer le fichier JSON à chaud n'a aucun effet immédiat — l'app continue de fonctionner avec la config en mémoire jusqu'à la fermeture. **Un redémarrage de l'application est nécessaire** pour que la suppression soit prise en compte.
 
 ## Build exécutable Windows
 
 > Voir `ROADMAP-EXECUTABLE.md` pour la roadmap complète.
-> **Statut : Phases 1 ✅ 2 ✅ 3 ✅ — Phases 4-5 à faire (ZIP + guide)**
+> **Statut : Phases 1 ✅ 2 ⏳ 3 ⏳ 4 ⏳ 5 ✅ — Rebuild requis (guide_installation/) + ZIP + GitHub Release**
 
-### État courant (20/03/2026)
+### État courant (30/03/2026)
 
 - **`build/claude_usage_monitor.dist/ClaudeWinMonitor.exe`** — build Nuitka validé (~23 MB)
 - **`dist-installer/Claude-Win-Monitor-Setup.exe`** — installateur Inno Setup validé (~16 MB)
@@ -79,8 +79,8 @@ Manifest V3. Le service worker `background.js` lit le cookie `sessionKey` sur `c
   --assume-yes-for-downloads \
   --company-name="Laurent Gérard" \
   --product-name="Claude Win Monitor" \
-  --file-version="1.8.4.0" \
-  --product-version="1.8.4.0" \
+  --file-version="1.9.1.0" \
+  --product-version="1.9.1.0" \
   --file-description="Moniteur de quotas Claude en temps réel" \
   --copyright="© 2026 Laurent Gérard" \
   --include-data-files="Claude-Win-Monitor_ICO.png=Claude-Win-Monitor_ICO.png" \
@@ -92,7 +92,13 @@ Manifest V3. Le service worker `background.js` lit le cookie `sessionKey` sur `c
   --include-data-files="IMG-hebdomadaire.png=IMG-hebdomadaire.png" \
   --include-data-files="IMG-portefeuille.png=IMG-portefeuille.png" \
   --include-data-files="Claude-Win-Monitor.ico=Claude-Win-Monitor.ico" \
-  --include-data-dir="guide_extension=guide_extension" \
+  --include-data-files="translations.json=translations.json" \
+  --include-data-files="flag-fr.png=flag-fr.png" \
+  --include-data-files="flag-en.png=flag-en.png" \
+  --include-data-files="flag-de.png=flag-de.png" \
+  --include-data-files="flag-it.png=flag-it.png" \
+  --include-data-files="flag-es.png=flag-es.png" \
+  --include-data-dir="guide_installation=guide_installation" \
   --output-dir=build \
   --output-filename=ClaudeWinMonitor \
   claude_usage_monitor.py
@@ -114,15 +120,16 @@ Ouvrir `Claude-Win-Monitor.iss` → **Build → Compile** (`F9`).
 - **`--mingw64` + Python 3.12 CPython** — Zig incompatible avec Windows Store Python
 - **Installateur : Inno Setup** — `C:\Program Files (x86)\Claude-Win-Monitor`, raccourcis, icône
 - **JSON config : `%LOCALAPPDATA%\Claude-Win-Monitor\`** — préservé lors des mises à jour
-- **Extension Chrome + PDF/MD guide** : exclus de l'installateur, distribués dans l'archive ZIP
+- **Extension Chrome + guide HTML** : exclus de l'installateur, distribués dans l'archive ZIP
+- **Guide d'installation** : `guide_installation/01-INSTALLATION.html` — bilingue FR/EN, fichier unique
 - **Authenticode (signature)** : non prévu — hors périmètre
 
 ### Prochaines étapes
 
-1. Scan VirusTotal de `Claude-Win-Monitor-Setup.exe`
-2. Phase 5 — Guide d'installation illustré (PDF + Markdown)
-3. Phase 4 — Archive ZIP + `SHA256SUMS.txt`
-4. GitHub Release v1.8.4
+1. Rebuild Nuitka (inclure `guide_installation/`)
+2. Recompiler Inno Setup
+3. Scan VirusTotal + `SHA256SUMS.txt` + constituer `Claude-Win-Monitor-v1.9.1.zip`
+4. GitHub Release v1.9.1
 
 ## UI Layout (v1.8.4+)
 

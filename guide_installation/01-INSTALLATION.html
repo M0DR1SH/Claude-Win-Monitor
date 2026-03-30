@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Claude Win Monitor v1.9.1 — Guide d'installation / Installation guide</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico"/>
+<link rel="shortcut icon" type="image/x-icon" href="favicon.ico"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #141414;
+  --surface:     #1e1e1e;
+  --surface2:    #252525;
+  --border:      #2d2d2d;
+  --accent:      #e87c23;
+  --text:        #d0d0d0;
+  --text-muted:  #666;
+  --text-bright: #f0f0f0;
+  --green:       #4caf7d;
+  --orange:      #e87c23;
+  --red:         #e05555;
+  --blue:        #5e9bde;
+  --code-bg:     #111;
+  --code-text:   #a3be8c;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+/* ─── Lang bar ─── */
+#lang-bar {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: #0d0d0d;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 7px 28px;
+  gap: 8px;
+  height: 44px;
+}
+
+.lang-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 4px 14px 4px 8px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: all .15s;
+}
+.flag-img {
+  width: 22px;
+  height: 15px;
+  border-radius: 2px;
+  vertical-align: middle;
+  border: none !important;
+  box-shadow: none !important;
+  display: block;
+}
+.lang-btn:hover { border-color: var(--accent); color: var(--text); }
+.lang-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ─── Page & layout ─── */
+.page {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+.body-row {
+  display: flex;
+  gap: 52px;
+}
+
+.main-col {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 72px;
+}
+
+/* ─── Sidebar ─── */
+.sidebar {
+  width: 196px;
+  flex-shrink: 0;
+}
+
+.sidebar-sticky {
+  position: sticky;
+  top: 44px;
+  max-height: calc(100vh - 56px);
+  overflow-y: auto;
+  padding: 24px 0 40px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.sidebar-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--text-muted);
+  padding: 0 0 10px 12px;
+  display: block;
+}
+
+.sb-list { list-style: none; padding: 0; margin: 0; }
+
+.sb-link {
+  display: block;
+  padding: 4px 10px 4px 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  line-height: 1.45;
+  transition: color .12s, border-color .12s;
+}
+.sb-link:hover { color: var(--text); border-left-color: var(--border); }
+.sb-link.past  { color: #3a3a3a; border-left-color: transparent; }
+.sb-link.active { color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
+
+@media (max-width: 1020px) { .sidebar { display: none; } }
+
+/* ─── Header ─── */
+.guide-header {
+  padding: 44px 0 28px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 36px;
+}
+
+.header-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.header-logo-row img.app-logo {
+  width: 64px; height: 64px; border-radius: 14px;
+  border: none; box-shadow: none;
+}
+.header-title h1 {
+  font-size: 30px; font-weight: 700;
+  color: var(--text-bright); line-height: 1.2;
+  margin-bottom: 7px;
+}
+.v-badge {
+  display: inline-block;
+  background: var(--accent); color: #fff;
+  font-size: 13px; font-weight: 700;
+  padding: 3px 11px; border-radius: 12px;
+  letter-spacing: .03em;
+}
+.guide-badge {
+  background: var(--surface2); color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.header-desc {
+  color: var(--text-muted); font-size: 14px;
+  line-height: 1.65; margin-bottom: 16px;
+  max-width: 640px;
+}
+.lang-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.lang-tag {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 3px 10px;
+  font-size: 12px; color: var(--text-muted);
+}
+
+/* ─── Sections ─── */
+.section { margin-bottom: 52px; }
+
+.section-header {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 22px; padding-bottom: 13px;
+  border-bottom: 1px solid var(--border);
+}
+.s-num {
+  background: var(--accent); color: #fff;
+  font-size: 13px; font-weight: 800;
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.section-header h2 { font-size: 19px; font-weight: 700; color: var(--text-bright); }
+
+h3 { font-size: 15px; font-weight: 700; color: var(--text-bright); margin: 26px 0 10px; }
+h4 { font-size: 14px; font-weight: 600; color: var(--accent); margin: 18px 0 8px; }
+
+p { margin-bottom: 12px; }
+p:last-child { margin-bottom: 0; }
+
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+strong { color: var(--text-bright); font-weight: 600; }
+
+ul, ol { padding-left: 22px; margin-bottom: 12px; }
+li { margin-bottom: 5px; }
+
+/* ─── Inline icons ─── */
+.icon-inline {
+  width: 26px; height: 26px;
+  vertical-align: middle;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 4px;
+  display: inline;
+  margin: 0 2px;
+}
+
+/* ─── Code ─── */
+code {
+  background: var(--code-bg); color: var(--code-text);
+  padding: 2px 7px; border-radius: 4px;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 13px;
+}
+.zip-tree {
+  background: var(--code-bg); border: 1px solid var(--border);
+  border-radius: 8px; padding: 18px 22px;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 13px; line-height: 1.9; color: #adb5bd; margin: 16px 0;
+  white-space: pre;
+}
+.zip-tree .folder { color: var(--accent); font-weight: 700; }
+.zip-tree .cmt    { color: #4e5a45; }
+.zip-tree .hl     { color: var(--text-bright); }
+
+/* ─── Callouts ─── */
+.callout {
+  border-left: 3px solid; padding: 13px 18px;
+  border-radius: 0 8px 8px 0; margin: 16px 0;
+  font-size: 14px; line-height: 1.65;
+}
+.callout-info    { border-color: var(--blue);   background: rgba(94,155,222,.07); }
+.callout-warning { border-color: var(--orange);  background: rgba(232,124,35,.07); }
+.callout-tip     { border-color: var(--green);   background: rgba(76,175,125,.07); }
+
+/* ─── Steps ─── */
+.steps { margin: 16px 0; }
+.step { display: flex; gap: 14px; margin-bottom: 16px; align-items: flex-start; }
+.step-n {
+  border: 2px solid var(--accent); color: var(--accent);
+  font-size: 12px; font-weight: 800;
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.step-body { flex: 1; }
+
+/* ─── Table ─── */
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+th {
+  background: var(--surface2); color: var(--text-bright);
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .05em; padding: 10px 14px; text-align: left;
+}
+td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+tr:last-child td { border-bottom: none; }
+
+/* ─── Bottom buttons (56×56) ─── */
+.btn-bar {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 20px 0;
+}
+.btn-56 {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px 20px; min-width: 100px;
+}
+.btn-56 img {
+  width: 56px; height: 56px;
+  border: none !important; box-shadow: none !important;
+}
+.btn-56 .btn-lbl { font-size: 13px; font-weight: 600; color: var(--text-bright); }
+.btn-56 .btn-dsc { font-size: 11px; color: var(--text-muted); text-align: center; }
+
+/* ─── Color chips ─── */
+.color-legend { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+.chip {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 5px 12px; font-size: 13px;
+}
+.chip-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.chip-green  .chip-dot { background: var(--green); }
+.chip-orange .chip-dot { background: var(--orange); }
+.chip-red    .chip-dot { background: var(--red); }
+.chip-green  { color: var(--green); }
+.chip-orange { color: var(--orange); }
+.chip-red    { color: var(--red); }
+
+/* ─── Images ─── */
+figure { margin: 20px 0; text-align: center; }
+figure img {
+  max-width: 100%; border-radius: 8px;
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 24px rgba(0,0,0,.45);
+}
+figure.narrow  img { max-width: 380px; }
+figure.medium  img { max-width: 580px; }
+figure.small   img { max-width: 260px; }
+figure.bare    img { border: none !important; box-shadow: none !important; background: transparent; }
+figcaption { margin-top: 8px; font-size: 12px; color: var(--text-muted); font-style: italic; }
+
+/* ─── Footer icons ─── */
+.footer-icons {
+  display: flex; justify-content: center; align-items: center;
+  gap: 28px; margin-bottom: 20px;
+}
+.footer-icons img {
+  height: 34px; width: auto;
+  border: none !important; box-shadow: none !important;
+  opacity: .65; transition: opacity .15s;
+}
+.footer-icons a:hover img { opacity: 1; }
+
+/* ─── Footer ─── */
+.guide-footer {
+  padding: 24px 0 48px;
+  border-top: 1px solid var(--border);
+  text-align: center; color: var(--text-muted); font-size: 13px; line-height: 2;
+}
+.guide-footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════ LANG BAR -->
+<div id="lang-bar">
+  <button class="lang-btn active" id="btn-fr" onclick="setLang('fr')">
+    <img src="flag-fr.png" class="flag-img" alt=""/> FR
+  </button>
+  <button class="lang-btn" id="btn-en" onclick="setLang('en')">
+    <img src="flag-en.png" class="flag-img" alt=""/> EN
+  </button>
+</div>
+
+
+<!-- ══════════════════════════════════════════ FRANÇAIS -->
+<div id="content-fr">
+<div class="page">
+  <header class="guide-header">
+    <div class="header-logo-row">
+      <img class="app-logo" src="../Claude-Win-Monitor_ICO.png" alt="Claude Win Monitor"/>
+      <div class="header-title">
+        <h1>Claude Win Monitor <span class="v-badge">v1.9.1</span></h1>
+        <span class="v-badge guide-badge">Guide d'installation</span>
+      </div>
+    </div>
+    <p class="header-desc">
+      Moniteur de quotas Claude en temps réel pour Windows. Affiche votre consommation de session (5&nbsp;h glissantes), hebdomadaire (7&nbsp;jours) et votre budget mensuel — directement sur votre bureau.<br/>
+      Interface disponible en <strong>5 langues</strong> (FR, EN, DE, IT, ES) et <strong>multi-devises</strong> (€, $, ou tout symbole libre).
+    </p>
+  </header>
+</div>
+
+<div class="page">
+  <div class="body-row">
+
+    <!-- ── Contenu principal FR ── -->
+    <main class="main-col">
+
+      <!-- 1 -->
+      <section class="section" id="fr-1">
+        <div class="section-header"><span class="s-num">1</span><h2>Prérequis</h2></div>
+        <ul>
+          <li><strong>Windows 10 ou Windows 11</strong> (64 bits)</li>
+          <li>Un navigateur <strong>compatible Chrome</strong> : Google Chrome, Microsoft Edge, Arc, Brave…<br/>
+            <em>(nécessaire pour l'extension automatique — voir section 7. Sans navigateur compatible, la clé de session peut être saisie manuellement.)</em></li>
+          <li>Un compte <strong>Claude.ai</strong> actif (abonnement Pro ou Team)</li>
+        </ul>
+        <div class="callout callout-tip" style="margin-top:14px;">
+          <strong>Aucune installation de Python ou d'autre logiciel n'est nécessaire.</strong><br/>
+          L'application est autonome et embarque toutes ses dépendances (~59 Mo installés).
+        </div>
+      </section>
+
+      <!-- 2 -->
+      <section class="section" id="fr-2">
+        <div class="section-header"><span class="s-num">2</span><h2>Contenu de l'archive</h2></div>
+        <p>L'archive <code>Claude-Win-Monitor-v1.9.1.zip</code> contient :</p>
+        <div class="zip-tree">
+<span class="hl">00-README.txt</span>                        <span class="cmt">← démarrage rapide FR + EN</span>
+<span class="hl">01-INSTALLATION.html</span>                 <span class="cmt">← ce guide</span>
+
+<span class="folder">02-Installateur/</span>
+  └─ <span class="hl">Claude-Win-Monitor-Setup.exe</span>    <span class="cmt">← programme d'installation</span>
+
+<span class="folder">03-Extension-Chrome/</span>
+  ├─ manifest.json
+  ├─ background.js
+  └─ icon.png
+
+SHA256SUMS.txt
+VERSION.txt
+        </div>
+      </section>
+
+      <!-- 3 -->
+      <section class="section" id="fr-3">
+        <div class="section-header"><span class="s-num">3</span><h2>Avant d'installer — antivirus</h2></div>
+        <p>L'application est compilée en binaire natif Windows (pas de script Python embarqué).</p>
+        <div class="callout callout-tip">
+          <strong>Le fichier d'installation est sûr : 0 détection sur 71 moteurs antivirus.</strong><br/>
+          Vérification indépendante : <a href="https://cutt.ly/BtPYKplu" target="_blank">VirusTotal — Claude-Win-Monitor-Setup.exe</a>
+        </div>
+        <p>Si vous disposez d'un antivirus, <strong>désactivez-le temporairement</strong> pendant l'installation, puis réactivez-le et ajoutez une exclusion sur le dossier d'installation (voir section 5).</p>
+      </section>
+
+      <!-- 4 -->
+      <section class="section" id="fr-4">
+        <div class="section-header"><span class="s-num">4</span><h2>Installation</h2></div>
+
+        <h3>4.1 Lancer l'installateur</h3>
+        <p>Double-cliquez sur <code>Claude-Win-Monitor-Setup.exe</code> (~16 Mo).</p>
+        <p>En survolant le fichier, vous pouvez vérifier ses métadonnées :<br/>
+        <strong>Description :</strong> Claude Win Monitor Setup — <strong>Entreprise :</strong> Laurent Gérard — <strong>Version :</strong> 1.9.1.0</p>
+        <figure class="medium"><img src="install00.png" alt="Fichier d'installation"/>
+          <figcaption>Propriétés du fichier d'installation</figcaption></figure>
+
+        <h3>4.2 Alerte SmartScreen (si elle apparaît)</h3>
+        <p>Windows peut afficher un écran bleu <strong>"Windows a protégé votre ordinateur"</strong>.</p>
+        <div class="callout callout-info">Cette alerte apparaît pour tout logiciel nouvellement publié et non signé numériquement. Elle ne signifie pas que le fichier est dangereux.</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-n">1</div>
+            <div class="step-body">Cliquez sur <strong>Informations complémentaires</strong>
+              <figure class="medium" style="margin-top:12px;"><img src="install09.png" alt="SmartScreen étape 1"/></figure></div>
+          </div>
+          <div class="step">
+            <div class="step-n">2</div>
+            <div class="step-body">Cliquez sur <strong>Exécuter quand même</strong>
+              <figure class="medium" style="margin-top:12px;"><img src="install10.png" alt="SmartScreen étape 2"/></figure></div>
+          </div>
+        </div>
+
+        <h3>4.3 Étapes de l'assistant</h3>
+        <div class="callout callout-info">Les <strong>zones en bleu</strong> indiquent des éléments optionnels. Les <strong>flèches rouges</strong> indiquent le bouton à cliquer.</div>
+
+        <h4>Étape 1 — Dossier de destination</h4>
+        <p>Dossier par défaut : <code>C:\Program Files (x86)\Claude-Win-Monitor</code> (~59 Mo). Modifiable via <strong>Parcourir</strong>. Cliquez sur <strong>Suivant</strong>.</p>
+        <figure class="medium"><img src="install01.png" alt="Dossier de destination"/></figure>
+
+        <h4>Étape 2 — Dossier du menu Démarrer</h4>
+        <p>Raccourci créé sous <strong>Claude Win Monitor</strong>. Cliquez sur <strong>Suivant</strong>.</p>
+        <figure class="medium"><img src="install02.png" alt="Menu Démarrer"/></figure>
+
+        <h4>Étape 3 — Prêt à installer</h4>
+        <p>Vérifiez le récapitulatif et cliquez sur <strong>Installer</strong>.</p>
+        <figure class="medium"><img src="install03.png" alt="Prêt à installer"/></figure>
+
+        <h4>Étape 4 — Fin de l'installation</h4>
+        <p>Laissez <strong>Lancer Claude Win Monitor</strong> coché et cliquez sur <strong>Terminer</strong>.</p>
+        <figure class="medium"><img src="install04.png" alt="Fin de l'installation"/></figure>
+      </section>
+
+      <!-- 5 -->
+      <section class="section" id="fr-5">
+        <div class="section-header"><span class="s-num">5</span><h2>Après l'installation — exclusion antivirus</h2></div>
+        <p>Réactivez votre antivirus et ajoutez une exclusion permanente :</p>
+        <p>Chemin à exclure : <code>C:\Program Files (x86)\Claude-Win-Monitor</code></p>
+        <div class="callout callout-info">Cherchez <strong>Exclusions</strong> ou <strong>Exceptions</strong> dans les paramètres de votre antivirus.</div>
+        <p>Claude Win Monitor apparaît dans <strong>Paramètres → Applications installées</strong> :</p>
+        <figure class="medium"><img src="install05.png" alt="Applications installées"/></figure>
+      </section>
+
+      <!-- 6 -->
+      <section class="section" id="fr-6">
+        <div class="section-header"><span class="s-num">6</span><h2>La fenêtre principale</h2></div>
+        <figure class="narrow">
+          <img src="claude_usage_monitor_FR.png" alt="Claude Win Monitor — fenêtre principale"/>
+          <figcaption>Fenêtre principale — les 3 niveaux de couleur sont visibles simultanément</figcaption>
+        </figure>
+
+        <h3>6.1 Barre de titre</h3>
+        <ul>
+          <li><strong>Logo</strong> Claude Win Monitor</li>
+          <li><strong>Drapeaux de langue</strong> — raccourci d'accès rapide aux Paramètres de langue</li>
+          <li><strong>Punaise</strong> <img src="bouton_punaise.png" class="icon-inline" alt="punaise"/> — maintient la fenêtre au premier plan de toutes les autres fenêtres ouvertes</li>
+          <li><strong>—</strong> minimiser / <strong>✕</strong> fermer l'application</li>
+        </ul>
+
+        <h3>6.2 En-tête</h3>
+        <ul>
+          <li><strong>Nom et email</strong> du compte Claude connecté</li>
+          <li><strong>Indicateur de connexion</strong> — badge <span style="color:var(--green);font-weight:600;">vert</span> (connexion active) ou <span style="color:var(--red);font-weight:600;">rouge</span> (erreur de connexion)</li>
+          <li><strong>Bouton Actualiser</strong> <img src="bouton_refresh.png" class="icon-inline" alt="actualiser"/> — force une mise à jour immédiate des quotas</li>
+        </ul>
+
+        <h3>6.3 Les 3 cartes de quotas</h3>
+        <p>Chaque carte affiche le pourcentage d'utilisation et une barre de progression dont la couleur indique le niveau d'alerte :</p>
+        <div class="color-legend">
+          <span class="chip chip-green"><span class="chip-dot"></span>Vert — moins de 50%</span>
+          <span class="chip chip-orange"><span class="chip-dot"></span>Orange — entre 50% et 80%</span>
+          <span class="chip chip-red"><span class="chip-dot"></span>Rouge — plus de 80%</span>
+        </div>
+        <table>
+          <thead><tr><th>Carte</th><th>Description</th><th>Informations affichées</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Session en cours</strong></td><td>Consommation sur les 5 dernières heures glissantes</td><td>Temps avant reset + date de reset</td></tr>
+            <tr><td><strong>Hebdomadaire</strong></td><td>Consommation sur les 7 derniers jours</td><td>Temps avant reset + date de reset</td></tr>
+            <tr><td><strong>Budget mensuel</strong></td><td>Montant consommé sur le plafond mensuel</td><td>Conso / plafond en devise + solde prépayé</td></tr>
+          </tbody>
+        </table>
+
+        <h3>6.4 Barre du bas</h3>
+        <div class="btn-bar">
+          <div class="btn-56">
+            <img src="bouton_paramètres.png" alt="Paramètres"/>
+            <span class="btn-lbl">Paramètres</span>
+            <span class="btn-dsc">Langue, devise,<br/>clé de session</span>
+          </div>
+          <div class="btn-56">
+            <img src="bouton_informations.png" alt="Informations"/>
+            <span class="btn-lbl">Informations</span>
+            <span class="btn-dsc">Version, date,<br/>auteur</span>
+          </div>
+          <div class="btn-56">
+            <img src="bouton_quitter.png" alt="Quitter"/>
+            <span class="btn-lbl">Quitter</span>
+            <span class="btn-dsc">Ferme<br/>l'application</span>
+          </div>
+        </div>
+        <div class="callout callout-info">Un <strong>texte d'aide</strong> (info-bulle) apparaît au survol de chaque bouton et élément interactif.</div>
+      </section>
+
+      <!-- 7 -->
+      <section class="section" id="fr-7">
+        <div class="section-header"><span class="s-num">7</span><h2>Installation de l'extension navigateur</h2></div>
+
+        <h3>Pourquoi cette extension ?</h3>
+        <p>Pour afficher vos statistiques, Claude Win Monitor a besoin de vos <strong>identifiants de session</strong> — une clé temporaire générée par Claude.ai à chaque connexion. L'extension <strong>Claude Session Helper</strong> la récupère automatiquement depuis votre navigateur et la transmet à l'application, sans aucune intervention de votre part.</p>
+        <div class="callout callout-info">Si vous préférez ne pas installer d'extension, vous pouvez saisir la clé manuellement dans les Paramètres (voir section 9).</div>
+
+        <h3>7.1 Ouvrir la gestion des extensions</h3>
+        <p><strong>Chrome / Edge / Brave :</strong> tapez <code>chrome://extensions</code> dans la barre d'adresse.<br/>
+        <strong>Arc :</strong> menu navigateur (icône en haut à gauche) → <strong>Extensions</strong> → <strong>Manage Extensions</strong>.</p>
+        <figure><img src="extension01.png" alt="Ouvrir les extensions"/></figure>
+
+        <h3>7.2 Activer le mode développeur et charger l'extension</h3>
+        <div class="steps">
+          <div class="step"><div class="step-n">1</div><div class="step-body">Activez <strong>Mode développeur</strong> (bouton en haut à droite)</div></div>
+          <div class="step"><div class="step-n">2</div><div class="step-body">Cliquez sur <strong>Charger l'extension non empaquetée</strong></div></div>
+          <div class="step"><div class="step-n">3</div><div class="step-body">Naviguez jusqu'au dossier dézippé, sélectionnez <code>03-Extension-Chrome</code> et confirmez</div></div>
+        </div>
+        <figure><img src="extension02.png" alt="Mode développeur et chargement"/></figure>
+
+        <h3>7.3 Vérifier l'installation</h3>
+        <p>L'extension <strong>Claude Session Helper</strong> apparaît dans la liste, activée.</p>
+        <figure><img src="extension03.png" alt="Extension installée"/></figure>
+
+        <h3>7.4 Alerte périodique du navigateur</h3>
+        <div class="callout callout-warning">
+          <em>"Désactivez les extensions de développeur pour votre sécurité"</em><br/>
+          Cliquez sur <strong>Ignorer</strong> ou <strong>Ne plus afficher</strong>. L'extension continue de fonctionner normalement.
+        </div>
+      </section>
+
+      <!-- 8 -->
+      <section class="section" id="fr-8">
+        <div class="section-header"><span class="s-num">8</span><h2>Premier lancement</h2></div>
+
+        <h3>8.1 Connexion automatique</h3>
+        <p>Si l'extension est installée et que vous êtes connecté à <strong>claude.ai</strong>, la connexion s'effectue automatiquement en quelques secondes.</p>
+        <p>Le badge de l'en-tête passe au vert :</p>
+        <figure class="small bare">
+          <img src="sync_ok.png" alt="Système Opérationnel"/>
+          <figcaption>Connexion active — la clé de session a été transmise automatiquement</figcaption>
+        </figure>
+        <p>L'application affiche vos quotas en temps réel.</p>
+
+        <h3>8.2 Connexion manuelle (sans extension)</h3>
+        <p>Si la connexion automatique ne fonctionne pas, le badge indique une erreur :</p>
+        <figure class="small bare">
+          <img src="sync_pb.png" alt="Erreur connexion"/>
+          <figcaption>Erreur de connexion — la clé de session n'est pas configurée ou a expiré</figcaption>
+        </figure>
+        <p>Dans ce cas, saisissez la clé manuellement :</p>
+        <div class="steps">
+          <div class="step"><div class="step-n">1</div><div class="step-body">Cliquez sur <img src="bouton_paramètres.png" class="icon-inline" alt=""/> <strong>Paramètres</strong> (barre du bas)</div></div>
+          <div class="step"><div class="step-n">2</div><div class="step-body">Dans la section <strong>Clé de Session</strong>, choisissez la <strong>Méthode manuelle</strong></div></div>
+          <div class="step"><div class="step-n">3</div><div class="step-body">Dans votre navigateur, ouvrez <a href="https://claude.ai" target="_blank">claude.ai</a>, puis faites un <strong>clic droit</strong> et choisissez <strong>Inspecter</strong> (ou appuyez sur <strong>F12</strong>)</div></div>
+          <div class="step"><div class="step-n">4</div><div class="step-body">Allez dans <strong>Application</strong> → <strong>Cookies</strong> → <code>https://claude.ai</code> → <code>sessionKey</code></div></div>
+          <div class="step"><div class="step-n">5</div><div class="step-body">Copiez la valeur et collez-la dans le champ de l'application</div></div>
+          <div class="step"><div class="step-n">6</div><div class="step-body">Cliquez sur <strong>Sauvegarder &amp; Relancer</strong></div></div>
+        </div>
+      </section>
+
+      <!-- 9 -->
+      <section class="section" id="fr-9">
+        <div class="section-header"><span class="s-num">9</span><h2>Paramètres</h2></div>
+        <p>Cliquez sur <img src="bouton_paramètres.png" class="icon-inline" alt=""/> <strong>Paramètres</strong> pour ouvrir la fenêtre de configuration.</p>
+        <figure class="narrow">
+          <img src="fenêtre_paramètres.png" alt="Fenêtre Paramètres"/>
+          <figcaption>Fenêtre Paramètres — clé de session, langue et devise</figcaption>
+        </figure>
+
+        <h3>9.1 Clé de session</h3>
+        <ul>
+          <li><strong>Méthode automatique (recommandée)</strong> — activez l'extension navigateur, elle gère tout automatiquement. Un lien <em>Ouvrir le guide d'installation</em> est disponible dans la fenêtre.</li>
+          <li><strong>Méthode manuelle</strong> — suivez le chemin <code>F12 → Application → Cookies → https://claude.ai → SessionKey</code>. Un lien <em>Ouvrir claude.ai</em> est disponible directement dans la fenêtre.</li>
+        </ul>
+
+        <h3>9.2 Langue</h3>
+        <p>5 langues disponibles — cliquez sur le drapeau souhaité :</p>
+        <div class="lang-tags" style="margin-bottom:12px;">
+          <span class="lang-tag"><img src="flag-fr.png" style="width:18px;vertical-align:middle;border:none;box-shadow:none;margin-right:4px;" alt=""/>FR</span>
+          <span class="lang-tag"><img src="flag-en.png" style="width:18px;vertical-align:middle;border:none;box-shadow:none;margin-right:4px;" alt=""/>EN</span>
+          <span class="lang-tag"><img src="flag-de.png" style="width:18px;vertical-align:middle;border:none;box-shadow:none;margin-right:4px;" alt=""/>DE</span>
+          <span class="lang-tag"><img src="flag-it.png" style="width:18px;vertical-align:middle;border:none;box-shadow:none;margin-right:4px;" alt=""/>IT</span>
+          <span class="lang-tag"><img src="flag-es.png" style="width:18px;vertical-align:middle;border:none;box-shadow:none;margin-right:4px;" alt=""/>ES</span>
+        </div>
+
+        <h3>9.3 Devise</h3>
+        <p>Choisissez <strong>€</strong> ou <strong>$</strong>, ou saisissez un symbole libre (1 à 3 caractères) — ex. : <code>CHF</code>, <code>£</code>, <code>¥</code>.</p>
+
+        <h3>9.4 Sauvegarder</h3>
+        <p>Cliquez sur <strong>Sauvegarder &amp; Relancer</strong> — l'application redémarre automatiquement avec les nouveaux paramètres.</p>
+      </section>
+
+      <!-- 10 -->
+      <section class="section" id="fr-10">
+        <div class="section-header"><span class="s-num">10</span><h2>Fenêtre Informations</h2></div>
+        <p>Cliquez sur <img src="bouton_informations.png" class="icon-inline" alt=""/> <strong>Informations</strong> pour afficher la version installée, la date de build et le lien vers l'auteur.</p>
+        <figure class="narrow">
+          <img src="fenêtre_informations.png" alt="Fenêtre À propos"/>
+          <figcaption>Fenêtre Informations — version et auteur</figcaption>
+        </figure>
+      </section>
+
+      <!-- 11 -->
+      <section class="section" id="fr-11">
+        <div class="section-header"><span class="s-num">11</span><h2>Icône dans la barre des tâches</h2></div>
+        <p>Claude Win Monitor s'exécute en arrière-plan avec une icône dans la zone de notification (coin inférieur droit de l'écran).</p>
+
+        <h3>11.1 Icône masquée ?</h3>
+        <p>Windows peut masquer l'icône dans le sous-menu <strong>^</strong> des icônes cachées. Pour l'afficher en permanence :</p>
+        <p><strong>Paramètres → Personnalisation → Barre des tâches → Autres icônes de barre d'état système</strong><br/>→ activez <strong>Moniteur de quotas Claude en temps réel</strong></p>
+
+        <h3>11.2 Utilisation de l'icône tray</h3>
+        <ul>
+          <li><strong>Survol</strong> — affiche le pourcentage de session en cours sans ouvrir la fenêtre</li>
+        </ul>
+        <figure class="medium">
+          <img src="survol_icone.png" alt="Survol icône tray"/>
+          <figcaption>Survol de l'icône — quota de session affiché dans la barre des tâches</figcaption>
+        </figure>
+        <ul>
+          <li><strong>Clic gauche</strong> — bascule la fenêtre au premier plan</li>
+          <li><strong>Clic droit</strong> — menu contextuel : <strong>Afficher</strong> / <strong>Actualiser</strong> / <strong>Quitter</strong></li>
+        </ul>
+      </section>
+
+      <!-- 12 -->
+      <section class="section" id="fr-12">
+        <div class="section-header"><span class="s-num">12</span><h2>Mise à jour</h2></div>
+        <div class="steps">
+          <div class="step"><div class="step-n">1</div><div class="step-body">Téléchargez la nouvelle archive ZIP</div></div>
+          <div class="step"><div class="step-n">2</div><div class="step-body">Lancez le nouveau <code>Claude-Win-Monitor-Setup.exe</code></div></div>
+          <div class="step"><div class="step-n">3</div><div class="step-body">Cliquez <strong>Suivant</strong> → <strong>Installer</strong> → <strong>Terminer</strong></div></div>
+        </div>
+        <div class="callout callout-tip">
+          <strong>Votre configuration est automatiquement conservée.</strong><br/>
+          La clé de session et les paramètres sont stockés dans <code>%LOCALAPPDATA%\Claude-Win-Monitor\</code>, un dossier séparé que l'installateur ne touche jamais.
+        </div>
+      </section>
+
+      <!-- 13 -->
+      <section class="section" id="fr-13">
+        <div class="section-header"><span class="s-num">13</span><h2>Désinstallation</h2></div>
+        <div class="steps">
+          <div class="step"><div class="step-n">1</div><div class="step-body"><strong>Paramètres Windows → Applications → Applications installées</strong></div></div>
+          <div class="step"><div class="step-n">2</div><div class="step-body">Recherchez <strong>Claude Win Monitor</strong> → <strong>⋯</strong> → <strong>Désinstaller</strong></div></div>
+        </div>
+        <p>Votre configuration est conservée dans <code>C:\Users\[votre nom]\AppData\Local\Claude-Win-Monitor\</code>.<br/>
+        Supprimez ce dossier manuellement pour une désinstallation complète.</p>
+      </section>
+
+    </main><!-- /main-col -->
+
+    <!-- ── Sidebar FR ── -->
+    <aside class="sidebar">
+      <div class="sidebar-sticky">
+        <span class="sidebar-title">Sur cette page</span>
+        <ul class="sb-list">
+          <li><a class="sb-link" href="#fr-1"  data-target="fr-1">1. Prérequis</a></li>
+          <li><a class="sb-link" href="#fr-2"  data-target="fr-2">2. Contenu de l'archive</a></li>
+          <li><a class="sb-link" href="#fr-3"  data-target="fr-3">3. Avant d'installer</a></li>
+          <li><a class="sb-link" href="#fr-4"  data-target="fr-4">4. Installation</a></li>
+          <li><a class="sb-link" href="#fr-5"  data-target="fr-5">5. Exclusion antivirus</a></li>
+          <li><a class="sb-link" href="#fr-6"  data-target="fr-6">6. Fenêtre principale</a></li>
+          <li><a class="sb-link" href="#fr-7"  data-target="fr-7">7. Extension navigateur</a></li>
+          <li><a class="sb-link" href="#fr-8"  data-target="fr-8">8. Premier lancement</a></li>
+          <li><a class="sb-link" href="#fr-9"  data-target="fr-9">9. Paramètres</a></li>
+          <li><a class="sb-link" href="#fr-10" data-target="fr-10">10. Informations</a></li>
+          <li><a class="sb-link" href="#fr-11" data-target="fr-11">11. Icône tray</a></li>
+          <li><a class="sb-link" href="#fr-12" data-target="fr-12">12. Mise à jour</a></li>
+          <li><a class="sb-link" href="#fr-13" data-target="fr-13">13. Désinstallation</a></li>
+        </ul>
+      </div>
+    </aside>
+
+  </div><!-- /body-row -->
+</div><!-- /page -->
+
+<div class="page">
+  <footer class="guide-footer">
+    <div class="footer-icons">
+      <a href="https://www.skool.com/ia-mastery" target="_blank" title="Communauté IA Mastery">
+        <img src="profil_IAM_50px.png" alt="IA Mastery"/>
+      </a>
+      <a href="https://www.skool.com/@laurent-gerard-1911?g=ia-mastery" target="_blank" title="Profil LG — skool.com/@laurent-gerard">
+        <img src="profil_LG_50px.png" alt="Laurent Gérard"/>
+      </a>
+      <a href="https://ko-fi.com/laurent_gerard" target="_blank" title="Ko-Fi — ko-fi.com/laurent_gerard">
+        <img src="profil_BMAC_50px.png" alt="Buy Me A Coffee"/>
+      </a>
+    </div>
+    <p style="color:#fff;">Claude Win Monitor v1.9.1 &nbsp;—&nbsp; Laurent Gérard &nbsp;—&nbsp; 30 mars 2026</p>
+  </footer>
+</div>
+</div><!-- /content-fr -->
+
+
+<!-- ══════════════════════════════════════════ ENGLISH -->
+<div id="content-en" style="display:none">
+<div class="page">
+  <header class="guide-header">
+    <div class="header-logo-row">
+      <img class="app-logo" src="../Claude-Win-Monitor_ICO.png" alt="Claude Win Monitor"/>
+      <div class="header-title">
+        <h1>Claude Win Monitor <span class="v-badge">v1.9.1</span></h1>
+        <span class="v-badge guide-badge">Installation guide</span>
+      </div>
+    </div>
+    <p class="header-desc">
+      Real-time Claude quota monitor for Windows. Displays your session usage (5 rolling hours), weekly usage (7 days) and your monthly budget — directly on your desktop.<br/>
+      Interface available in <strong>5 languages</strong> (FR, EN, DE, IT, ES) with <strong>multi-currency</strong> support (€, $, or any custom symbol).
+    </p>
+  </header>
+</div>
+
+<div class="page">
+  <div class="body-row">
+
+    <!-- ── Main content EN ── -->
+    <main class="main-col">
+
+      <!-- 1 -->
+      <section class="section" id="en-1">
+        <div class="section-header"><span class="s-num">1</span><h2>Prerequisites</h2></div>
+        <ul>
+          <li><strong>Windows 10 or Windows 11</strong> (64-bit)</li>
+          <li>A <strong>Chrome-compatible browser</strong>: Google Chrome, Microsoft Edge, Arc, Brave…<br/>
+            <em>(required for the automatic extension — see section 7. Without a compatible browser, the session key can be entered manually.)</em></li>
+          <li>An active <strong>Claude.ai</strong> account (Pro or Team subscription)</li>
+        </ul>
+        <div class="callout callout-tip" style="margin-top:14px;">
+          <strong>No Python or other software installation is required.</strong><br/>
+          The application is self-contained and includes all its dependencies (~59 MB installed).
+        </div>
+      </section>
+
+      <!-- 2 -->
+      <section class="section" id="en-2">
+        <div class="section-header"><span class="s-num">2</span><h2>Archive contents</h2></div>
+        <p>The archive <code>Claude-Win-Monitor-v1.9.1.zip</code> contains:</p>
+        <div class="zip-tree">
+<span class="hl">00-README.txt</span>                        <span class="cmt">← quick start FR + EN</span>
+<span class="hl">01-INSTALLATION.html</span>                 <span class="cmt">← this guide</span>
+
+<span class="folder">02-Installateur/</span>
+  └─ <span class="hl">Claude-Win-Monitor-Setup.exe</span>    <span class="cmt">← installer</span>
+
+<span class="folder">03-Extension-Chrome/</span>
+  ├─ manifest.json
+  ├─ background.js
+  └─ icon.png
+
+SHA256SUMS.txt
+VERSION.txt
+        </div>
+      </section>
+
+      <!-- 3 -->
+      <section class="section" id="en-3">
+        <div class="section-header"><span class="s-num">3</span><h2>Before installing — antivirus</h2></div>
+        <p>The application is compiled as a native Windows binary (no embedded Python script).</p>
+        <div class="callout callout-tip">
+          <strong>The installer is safe: 0 detections out of 71 antivirus engines.</strong><br/>
+          Independent verification: <a href="https://cutt.ly/BtPYKplu" target="_blank">VirusTotal — Claude-Win-Monitor-Setup.exe</a>
+        </div>
+        <p>If you have an antivirus, <strong>temporarily disable it</strong> during installation, then re-enable it and add an exclusion for the installation folder (see section 5).</p>
+      </section>
+
+      <!-- 4 -->
+      <section class="section" id="en-4">
+        <div class="section-header"><span class="s-num">4</span><h2>Installation</h2></div>
+
+        <h3>4.1 Run the installer</h3>
+        <p>Double-click <code>Claude-Win-Monitor-Setup.exe</code> (~16 MB).</p>
+        <p>By hovering over the file, you can verify its metadata:<br/>
+        <strong>Description:</strong> Claude Win Monitor Setup — <strong>Company:</strong> Laurent Gérard — <strong>Version:</strong> 1.9.1.0</p>
+        <figure class="medium"><img src="install00.png" alt="Installer file"/>
+          <figcaption>Installer file properties</figcaption></figure>
+
+        <h3>4.2 SmartScreen alert (if it appears)</h3>
+        <p>Windows may show a blue screen <strong>"Windows protected your PC"</strong>.</p>
+        <div class="callout callout-info">This alert appears for any newly published software that is not digitally signed. It does not mean the file is dangerous.</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-n">1</div>
+            <div class="step-body">Click <strong>More info</strong>
+              <figure class="medium" style="margin-top:12px;"><img src="install09.png" alt="SmartScreen step 1"/></figure></div>
+          </div>
+          <div class="step">
+            <div class="step-n">2</div>
+            <div class="step-body">Click <strong>Run anyway</strong>
+              <figure class="medium" style="margin-top:12px;"><img src="install10.png" alt="SmartScreen step 2"/></figure></div>
+          </div>
+        </div>
+
+        <h3>4.3 Installer steps</h3>
+        <div class="callout callout-info"><strong>Blue areas</strong> indicate optional elements. <strong>Red arrows</strong> indicate the button to click.</div>
+
+        <h4>Step 1 — Destination folder</h4>
+        <p>Default folder: <code>C:\Program Files (x86)\Claude-Win-Monitor</code> (~59 MB). Can be changed via <strong>Browse</strong>. Click <strong>Next</strong>.</p>
+        <figure class="medium"><img src="install01.png" alt="Destination folder"/></figure>
+
+        <h4>Step 2 — Start menu folder</h4>
+        <p>A shortcut will be created under <strong>Claude Win Monitor</strong>. Click <strong>Next</strong>.</p>
+        <figure class="medium"><img src="install02.png" alt="Start menu folder"/></figure>
+
+        <h4>Step 3 — Ready to install</h4>
+        <p>Review the summary and click <strong>Install</strong>.</p>
+        <figure class="medium"><img src="install03.png" alt="Ready to install"/></figure>
+
+        <h4>Step 4 — Installation complete</h4>
+        <p>Leave <strong>Launch Claude Win Monitor</strong> checked and click <strong>Finish</strong>.</p>
+        <figure class="medium"><img src="install04.png" alt="Installation complete"/></figure>
+      </section>
+
+      <!-- 5 -->
+      <section class="section" id="en-5">
+        <div class="section-header"><span class="s-num">5</span><h2>After installation — antivirus exclusion</h2></div>
+        <p>Re-enable your antivirus and add a permanent exclusion:</p>
+        <p>Path to exclude: <code>C:\Program Files (x86)\Claude-Win-Monitor</code></p>
+        <div class="callout callout-info">Look for <strong>Exclusions</strong> or <strong>Exceptions</strong> in your antivirus settings.</div>
+        <p>Claude Win Monitor is now visible in <strong>Settings → Installed apps</strong>:</p>
+        <figure class="medium"><img src="install05.png" alt="Installed apps"/></figure>
+      </section>
+
+      <!-- 6 -->
+      <section class="section" id="en-6">
+        <div class="section-header"><span class="s-num">6</span><h2>The main window</h2></div>
+        <figure class="narrow">
+          <img src="claude_usage_monitor_EN.png" alt="Claude Win Monitor — main window"/>
+          <figcaption>Main window — all 3 color levels visible simultaneously</figcaption>
+        </figure>
+
+        <h3>6.1 Title bar</h3>
+        <ul>
+          <li><strong>Logo</strong> Claude Win Monitor</li>
+          <li><strong>Language flags</strong> — quick shortcut to language Settings</li>
+          <li><strong>Pin</strong> <img src="bouton_punaise.png" class="icon-inline" alt="pin"/> — keeps the window on top of all other open windows</li>
+          <li><strong>—</strong> minimize / <strong>✕</strong> close the application</li>
+        </ul>
+
+        <h3>6.2 Header</h3>
+        <ul>
+          <li><strong>Name and email</strong> of the connected Claude account</li>
+          <li><strong>Connection indicator</strong> — <span style="color:var(--green);font-weight:600;">green</span> badge (active connection) or <span style="color:var(--red);font-weight:600;">red</span> badge (connection error)</li>
+          <li><strong>Refresh button</strong> <img src="bouton_refresh.png" class="icon-inline" alt="refresh"/> — forces an immediate quota update</li>
+        </ul>
+
+        <h3>6.3 The 3 quota cards</h3>
+        <p>Each card displays the usage percentage and a progress bar whose color indicates the alert level:</p>
+        <div class="color-legend">
+          <span class="chip chip-green"><span class="chip-dot"></span>Green — less than 50%</span>
+          <span class="chip chip-orange"><span class="chip-dot"></span>Orange — between 50% and 80%</span>
+          <span class="chip chip-red"><span class="chip-dot"></span>Red — above 80%</span>
+        </div>
+        <table>
+          <thead><tr><th>Card</th><th>Description</th><th>Displayed info</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Session</strong></td><td>Usage over the last 5 rolling hours</td><td>Time until reset + reset date</td></tr>
+            <tr><td><strong>Weekly</strong></td><td>Usage over the last 7 days</td><td>Time until reset + reset date</td></tr>
+            <tr><td><strong>Monthly budget</strong></td><td>Amount used vs. monthly cap</td><td>Used / cap in currency + prepaid balance</td></tr>
+          </tbody>
+        </table>
+
+        <h3>6.4 Bottom bar</h3>
+        <div class="btn-bar">
+          <div class="btn-56">
+            <img src="bouton_paramètres.png" alt="Settings"/>
+            <span class="btn-lbl">Settings</span>
+            <span class="btn-dsc">Language, currency,<br/>session key</span>
+          </div>
+          <div class="btn-56">
+            <img src="bouton_informations.png" alt="Information"/>
+            <span class="btn-lbl">Information</span>
+            <span class="btn-dsc">Version, date,<br/>author</span>
+          </div>
+          <div class="btn-56">
+            <img src="bouton_quitter.png" alt="Quit"/>
+            <span class="btn-lbl">Quit</span>
+            <span class="btn-dsc">Close the<br/>application</span>
+          </div>
+        </div>
+        <div class="callout callout-info">A <strong>tooltip</strong> appears when hovering over each button and interactive element.</div>
+      </section>
+
+      <!-- 7 -->
+      <section class="section" id="en-7">
+        <div class="section-header"><span class="s-num">7</span><h2>Browser extension installation</h2></div>
+
+        <h3>Why this extension?</h3>
+        <p>To display your statistics, Claude Win Monitor needs your <strong>session credentials</strong> — a temporary key generated by Claude.ai at each login. The <strong>Claude Session Helper</strong> extension retrieves it automatically from your browser and passes it to the application, with no action required on your part.</p>
+        <div class="callout callout-info">If you prefer not to install an extension, you can enter the key manually in Settings (see section 9).</div>
+
+        <h3>7.1 Open extension management</h3>
+        <p><strong>Chrome / Edge / Brave:</strong> type <code>chrome://extensions</code> in the address bar.<br/>
+        <strong>Arc:</strong> browser menu (icon top left) → <strong>Extensions</strong> → <strong>Manage Extensions</strong>.</p>
+        <figure><img src="extension01.png" alt="Open extension management"/></figure>
+
+        <h3>7.2 Enable developer mode and load the extension</h3>
+        <div class="steps">
+          <div class="step"><div class="step-n">1</div><div class="step-body">Enable <strong>Developer mode</strong> (toggle top right)</div></div>
+          <div class="step"><div class="step-n">2</div><div class="step-body">Click <strong>Load unpacked</strong></div></div>
+          <div class="step"><div class="step-n">3</div><div class="step-body">Navigate to the unzipped folder, select <code>03-Extension-Chrome</code> and confirm</div></div>
+        </div>
+        <figure><img src="extension02.png" alt="Developer mode and loading"/></figure>
+
+        <h3>7.3 Verify installation</h3>
+        <p>The <strong>Claude Session Helper</strong> extension appears in the list, enabled.</p>
+        <figure><img src="extension03.png" alt="Extension installed"/></figure>
+
+        <h3>7.4 Periodic browser alert</h3>
+        <div class="callout callout-warning">
+          <em>"Disable developer extensions for your security"</em><br/>
+          Click <strong>Dismiss</strong> or <strong>Don't show again</strong>. The extension continues to work normally.
+        </div>
+      </section>
+
+      <!-- 8 -->
+      <section class="section" id="en-8">
+        <div class="section-header"><span class="s-num">8</span><h2>First launch</h2></div>
+
+        <h3>8.1 Automatic connection</h3>
+        <p>If the extension is installed and you are logged in to <strong>claude.ai</strong>, the connection happens automatically within a few seconds.</p>
+        <p>The header badge turns green:</p>
+        <figure class="small">
+          <img src="sync_ok.png" alt="System Operational"/>
+          <figcaption>Active connection — the session key was transmitted automatically</figcaption>
+        </figure>
+        <p>The application displays your quotas in real time.</p>
+
+        <h3>8.2 Manual connection (without extension)</h3>
+        <p>If the automatic connection fails, the badge shows an error:</p>
+        <figure class="small">
+          <img src="sync_pb.png" alt="Connection error"/>
+          <figcaption>Connection error — the session key is not configured or has expired</figcaption>
+        </figure>
+        <p>In that case, enter the key manually:</p>
+        <div class="steps">
+          <div class="step"><div class="step-n">1</div><div class="step-body">Click <img src="bouton_paramètres.png" class="icon-inline" alt=""/> <strong>Settings</strong> (bottom bar)</div></div>
+          <div class="step"><div class="step-n">2</div><div class="step-body">In the <strong>Session Key</strong> section, choose the <strong>Manual method</strong></div></div>
+          <div class="step"><div class="step-n">3</div><div class="step-body">In your browser, open <a href="https://claude.ai" target="_blank">claude.ai</a>, then right-click and select <strong>Inspect</strong> (or press <strong>F12</strong>)</div></div>
+          <div class="step"><div class="step-n">4</div><div class="step-body">Go to <strong>Application</strong> → <strong>Cookies</strong> → <code>https://claude.ai</code> → <code>sessionKey</code></div></div>
+          <div class="step"><div class="step-n">5</div><div class="step-body">Copy the value and paste it into the application field</div></div>
+          <div class="step"><div class="step-n">6</div><div class="step-body">Click <strong>Save &amp; Restart</strong></div></div>
+        </div>
+      </section>
+
+      <!-- 9 -->
+      <section class="section" id="en-9">
+        <div class="section-header"><span class="s-num">9</span><h2>Settings</h2></div>
+        <p>Click <img src="bouton_paramètres.png" class="icon-inline" alt=""/> <strong>Settings</strong> to open the configuration window.</p>
+        <figure class="narrow">
+          <img src="fenêtre_paramètres.png" alt="Settings window"/>
+          <figcaption>Settings window — session key, language and currency</figcaption>
+        </figure>
+
+        <h3>9.1 Session key</h3>
+        <ul>
+          <li><strong>Automatic method (recommended)</strong> — activate the browser extension, it handles everything. An <em>Open installation guide</em> link is available in the window.</li>
+          <li><strong>Manual method</strong> — follow the path <code>F12 → Application → Cookies → https://claude.ai → SessionKey</code>. An <em>Open claude.ai</em> link is available directly in the window.</li>
+        </ul>
+
+        <h3>9.2 Language</h3>
+        <p>5 languages available — click the desired flag:</p>
+        <div class="lang-tags" style="margin-bottom:12px;">
+          <span class="lang-tag"><img src="flag-fr.png" style="width:18px;vertical-align:middle;border:none;box-shadow:none;margin-right:4px;" alt=""/>FR</span>
+          <span class="lang-tag"><img src="flag-en.png" style="width:18px;vertical-align:middle;border:none;box-shadow:none;margin-right:4px;" alt=""/>EN</span>
+          <span class="lang-tag"><img src="flag-de.png" style="width:18px;vertical-align:middle;border:none;box-shadow:none;margin-right:4px;" alt=""/>DE</span>
+          <span class="lang-tag"><img src="flag-it.png" style="width:18px;vertical-align:middle;border:none;box-shadow:none;margin-right:4px;" alt=""/>IT</span>
+          <span class="lang-tag"><img src="flag-es.png" style="width:18px;vertical-align:middle;border:none;box-shadow:none;margin-right:4px;" alt=""/>ES</span>
+        </div>
+
+        <h3>9.3 Currency</h3>
+        <p>Choose <strong>€</strong> or <strong>$</strong>, or enter a custom symbol (1 to 3 characters) — e.g.: <code>CHF</code>, <code>£</code>, <code>¥</code>.</p>
+
+        <h3>9.4 Save</h3>
+        <p>Click <strong>Save &amp; Restart</strong> — the application restarts automatically with the new settings.</p>
+      </section>
+
+      <!-- 10 -->
+      <section class="section" id="en-10">
+        <div class="section-header"><span class="s-num">10</span><h2>Information window</h2></div>
+        <p>Click <img src="bouton_informations.png" class="icon-inline" alt=""/> <strong>Information</strong> to display the installed version, build date and link to the author.</p>
+        <figure class="narrow">
+          <img src="fenêtre_informations.png" alt="About window"/>
+          <figcaption>Information window — version and author</figcaption>
+        </figure>
+      </section>
+
+      <!-- 11 -->
+      <section class="section" id="en-11">
+        <div class="section-header"><span class="s-num">11</span><h2>System tray icon</h2></div>
+        <p>Claude Win Monitor runs in the background with an icon in the notification area (bottom right corner of the screen).</p>
+
+        <h3>11.1 Icon hidden?</h3>
+        <p>Windows may hide the icon in the <strong>^</strong> overflow menu. To display it permanently:</p>
+        <p><strong>Settings → Personalization → Taskbar → Other system tray icons</strong><br/>→ enable <strong>Real-time Claude quota monitor</strong></p>
+
+        <h3>11.2 Using the tray icon</h3>
+        <ul>
+          <li><strong>Hover</strong> — displays the current session percentage without opening the window</li>
+        </ul>
+        <figure class="medium">
+          <img src="survol_icone.png" alt="Tray icon hover"/>
+          <figcaption>Icon hover — session quota displayed in the taskbar</figcaption>
+        </figure>
+        <ul>
+          <li><strong>Left click</strong> — brings the window to the foreground</li>
+          <li><strong>Right click</strong> — context menu: <strong>Show</strong> / <strong>Refresh</strong> / <strong>Quit</strong></li>
+        </ul>
+      </section>
+
+      <!-- 12 -->
+      <section class="section" id="en-12">
+        <div class="section-header"><span class="s-num">12</span><h2>Update</h2></div>
+        <div class="steps">
+          <div class="step"><div class="step-n">1</div><div class="step-body">Download the new ZIP archive</div></div>
+          <div class="step"><div class="step-n">2</div><div class="step-body">Run the new <code>Claude-Win-Monitor-Setup.exe</code></div></div>
+          <div class="step"><div class="step-n">3</div><div class="step-body">Click <strong>Next</strong> → <strong>Install</strong> → <strong>Finish</strong></div></div>
+        </div>
+        <div class="callout callout-tip">
+          <strong>Your configuration is automatically preserved.</strong><br/>
+          The session key and settings are stored in <code>%LOCALAPPDATA%\Claude-Win-Monitor\</code>, a separate folder the installer never touches.
+        </div>
+      </section>
+
+      <!-- 13 -->
+      <section class="section" id="en-13">
+        <div class="section-header"><span class="s-num">13</span><h2>Uninstallation</h2></div>
+        <div class="steps">
+          <div class="step"><div class="step-n">1</div><div class="step-body"><strong>Windows Settings → Apps → Installed apps</strong></div></div>
+          <div class="step"><div class="step-n">2</div><div class="step-body">Find <strong>Claude Win Monitor</strong> → <strong>⋯</strong> → <strong>Uninstall</strong></div></div>
+        </div>
+        <p>Your configuration is preserved in <code>C:\Users\[your name]\AppData\Local\Claude-Win-Monitor\</code>.<br/>
+        Delete this folder manually for a complete uninstallation.</p>
+      </section>
+
+    </main><!-- /main-col -->
+
+    <!-- ── Sidebar EN ── -->
+    <aside class="sidebar">
+      <div class="sidebar-sticky">
+        <span class="sidebar-title">On this page</span>
+        <ul class="sb-list">
+          <li><a class="sb-link" href="#en-1"  data-target="en-1">1. Prerequisites</a></li>
+          <li><a class="sb-link" href="#en-2"  data-target="en-2">2. Archive contents</a></li>
+          <li><a class="sb-link" href="#en-3"  data-target="en-3">3. Before installing</a></li>
+          <li><a class="sb-link" href="#en-4"  data-target="en-4">4. Installation</a></li>
+          <li><a class="sb-link" href="#en-5"  data-target="en-5">5. Antivirus exclusion</a></li>
+          <li><a class="sb-link" href="#en-6"  data-target="en-6">6. Main window</a></li>
+          <li><a class="sb-link" href="#en-7"  data-target="en-7">7. Browser extension</a></li>
+          <li><a class="sb-link" href="#en-8"  data-target="en-8">8. First launch</a></li>
+          <li><a class="sb-link" href="#en-9"  data-target="en-9">9. Settings</a></li>
+          <li><a class="sb-link" href="#en-10" data-target="en-10">10. Information</a></li>
+          <li><a class="sb-link" href="#en-11" data-target="en-11">11. Tray icon</a></li>
+          <li><a class="sb-link" href="#en-12" data-target="en-12">12. Update</a></li>
+          <li><a class="sb-link" href="#en-13" data-target="en-13">13. Uninstallation</a></li>
+        </ul>
+      </div>
+    </aside>
+
+  </div><!-- /body-row -->
+</div><!-- /page -->
+
+<div class="page">
+  <footer class="guide-footer">
+    <div class="footer-icons">
+      <a href="https://www.skool.com/ia-mastery" target="_blank" title="IA Mastery Community">
+        <img src="profil_IAM_50px.png" alt="IA Mastery"/>
+      </a>
+      <a href="https://www.skool.com/@laurent-gerard-1911?g=ia-mastery" target="_blank" title="LG profile — skool.com/@laurent-gerard">
+        <img src="profil_LG_50px.png" alt="Laurent Gérard"/>
+      </a>
+      <a href="https://ko-fi.com/laurent_gerard" target="_blank" title="Ko-Fi — ko-fi.com/laurent_gerard">
+        <img src="profil_BMAC_50px.png" alt="Buy Me A Coffee"/>
+      </a>
+    </div>
+    <p style="color:#fff;">Claude Win Monitor v1.9.1 &nbsp;—&nbsp; Laurent Gérard &nbsp;—&nbsp; 30 mars 2026</p>
+  </footer>
+</div>
+</div><!-- /content-en -->
+
+
+<script>
+  // Langue active courante ('fr' ou 'en')
+  let currentLang = 'fr';
+
+  /**
+   * Bascule l'affichage entre la version FR et EN.
+   * - Affiche/masque les deux blocs de contenu
+   * - Met à jour l'état actif du bouton de langue
+   * - Remonte en haut de page
+   * - Relance le suivi de position dans la sidebar
+   */
+  function setLang(lang) {
+    document.getElementById('content-fr').style.display = lang === 'fr' ? 'block' : 'none';
+    document.getElementById('content-en').style.display = lang === 'en' ? 'block' : 'none';
+    document.getElementById('btn-fr').classList.toggle('active', lang === 'fr');
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    document.documentElement.lang = lang;
+    currentLang = lang;
+    window.scrollTo(0, 0);
+    updateActive();
+  }
+
+  /**
+   * Met à jour la sidebar "Sur cette page / On this page" selon la position de scroll.
+   * Logique :
+   *   - La section "active" est la dernière dont le haut est passé sous le seuil de 80px.
+   *   - Les sections déjà défilées reçoivent la classe "past" (texte très atténué).
+   *   - La section courante reçoit la classe "active" (orange).
+   *   - Les sections à venir restent dans l'état par défaut (gris).
+   * Les IDs suivent le format "fr-N" ou "en-N" — on extrait N pour comparer.
+   */
+  function updateActive() {
+    const sections = document.querySelectorAll('#content-' + currentLang + ' .section[id]');
+    let activeId = null;
+    sections.forEach(function(s) {
+      if (s.getBoundingClientRect().top <= 80) activeId = s.id;
+    });
+    const activeNum = activeId ? parseInt(activeId.split('-')[1]) : 0;
+    document.querySelectorAll('.sb-link').forEach(function(link) {
+      const t = link.dataset.target;
+      const n = parseInt(t.split('-')[1]);
+      link.classList.toggle('active', t === activeId);
+      link.classList.toggle('past',   activeId !== null && n < activeNum);
+    });
+  }
+
+  // Mise à jour au scroll (passive = pas de blocage du scroll natif)
+  window.addEventListener('scroll', updateActive, { passive: true });
+  // Initialisation au chargement
+  updateActive();
+</script>
+
+</body>
+</html>

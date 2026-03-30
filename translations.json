@@ -1,0 +1,353 @@
+{
+  "_meta": {
+    "version":     "1.0",
+    "app_version": "1.9.1",
+    "description": "Claude Win Monitor — fichier de traductions UI",
+    "languages":   ["fr", "en", "de", "it", "es"]
+  },
+
+  "fr": {
+    "_name": "Français",
+    "_code": "FR",
+
+    "card_session_title": "Session en cours",
+    "card_weekly_title":  "Hebdomadaire",
+    "card_budget_title":  "Budget mensuel",
+
+    "tooltip_session": "Session actuelle (limite glissante de 5h)",
+    "tooltip_weekly":  "Limites hebdomadaires (fenêtre glissante de 7 jours)",
+    "tooltip_budget":  "Usage supplémentaire (budget mensuel de dépassement)",
+
+    "reset_in":       "Reset : {t}",
+    "no_limit":       "Aucune limite active",
+    "budget_spent":   "Conso : {x} / {y} {cur}",
+    "budget_balance": "Solde : {x} {cur}",
+
+    "status_connecting":    "● Connexion...",
+    "status_refreshing":    "● Actualisation...",
+    "status_restarting":    "● Redémarrage...",
+    "status_ok":            "● Système Opérationnel",
+    "status_expired":       "🔒 Session expirée → relancer l'extension",
+    "status_no_org":        "⚠️ Organisation introuvable",
+    "status_conn_error":    "❌ Erreur connexion",
+    "status_api_error":     "⚠️ Erreur API {code}",
+    "status_network_error": "📡 Erreur réseau",
+
+    "tooltip_refresh":     "Actualiser",
+    "tooltip_settings":    "Paramètres",
+    "tooltip_about":       "À propos",
+    "tooltip_quit":        "Quitter",
+    "tooltip_refresh_btn": "Actualiser les quotas Claude",
+
+    "tray_show":    "Afficher",
+    "tray_refresh": "Actualiser",
+    "tray_quit":    "Quitter",
+
+    "settings_title":         "⚙   Paramètres",
+    "settings_sk_title":      "Clé de Session",
+    "settings_method1":       "1.  Méthode automatique  (recommandée)",
+    "settings_method1_desc":  "Activez l'extension  \"Claude Session Helper\"  dans votre navigateur.",
+    "settings_open_guide":    "↗  Ouvrir le guide d'installation",
+    "settings_method2":       "2.  Méthode manuelle",
+    "settings_method2_desc":  "F12  ›  Application  ›  Cookies  ›  https://claude.ai  ›  SessionKey",
+    "settings_open_claudeai": "↗  Ouvrir claude.ai",
+    "settings_save":          "Sauvegarder & Relancer",
+    "settings_lang_label":    "Langue",
+    "settings_currency_label":"Devise",
+    "settings_currency_other":"Autre :",
+
+    "info_title":   "🅻🅶   À propos",
+    "info_version": "Version",
+    "info_date":    "Date",
+    "info_author":  "Auteur",
+    "info_close":   "Fermer",
+
+    "unit_hour": "h",
+    "unit_min":  "min",
+    "unit_day":  "j",
+
+    "date_at": "à",
+    "days_long":    ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"],
+    "days_short":   ["lun", "mar", "mer", "jeu", "ven", "sam", "dim"],
+    "months_long":  ["", "janvier", "février", "mars", "avril", "mai", "juin",
+                     "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
+    "months_short": ["", "janv", "fév", "mars", "avr", "mai", "juin",
+                     "juil", "août", "sept", "oct", "nov", "déc"]
+  },
+
+  "en": {
+    "_name": "English",
+    "_code": "EN",
+
+    "card_session_title": "Session",
+    "card_weekly_title":  "Weekly",
+    "card_budget_title":  "Monthly budget",
+
+    "tooltip_session": "Current session (5h rolling limit)",
+    "tooltip_weekly":  "Weekly limits (7-day rolling window)",
+    "tooltip_budget":  "Extra usage (monthly overage budget)",
+
+    "reset_in":       "Reset: {t}",
+    "no_limit":       "No active limit",
+    "budget_spent":   "Used: {x} / {y} {cur}",
+    "budget_balance": "Balance: {x} {cur}",
+
+    "status_connecting":    "● Connecting...",
+    "status_refreshing":    "● Refreshing...",
+    "status_restarting":    "● Restarting...",
+    "status_ok":            "● System Operational",
+    "status_expired":       "🔒 Session expired → restart extension",
+    "status_no_org":        "⚠️ Organization not found",
+    "status_conn_error":    "❌ Connection error",
+    "status_api_error":     "⚠️ API error {code}",
+    "status_network_error": "📡 Network error",
+
+    "tooltip_refresh":     "Refresh",
+    "tooltip_settings":    "Settings",
+    "tooltip_about":       "About",
+    "tooltip_quit":        "Quit",
+    "tooltip_refresh_btn": "Refresh Claude quotas",
+
+    "tray_show":    "Show",
+    "tray_refresh": "Refresh",
+    "tray_quit":    "Quit",
+
+    "settings_title":         "⚙   Settings",
+    "settings_sk_title":      "Session Key",
+    "settings_method1":       "1.  Automatic method  (recommended)",
+    "settings_method1_desc":  "Enable the \"Claude Session Helper\" extension in your browser.",
+    "settings_open_guide":    "↗  Open installation guide",
+    "settings_method2":       "2.  Manual method",
+    "settings_method2_desc":  "F12  ›  Application  ›  Cookies  ›  https://claude.ai  ›  SessionKey",
+    "settings_open_claudeai": "↗  Open claude.ai",
+    "settings_save":          "Save & Restart",
+    "settings_lang_label":    "Language",
+    "settings_currency_label":"Currency",
+    "settings_currency_other":"Other:",
+
+    "info_title":   "🅻🅶   About",
+    "info_version": "Version",
+    "info_date":    "Date",
+    "info_author":  "Author",
+    "info_close":   "Close",
+
+    "unit_hour": "hr",
+    "unit_min":  "min",
+    "unit_day":  "d",
+
+    "date_at": "at",
+    "days_long":    ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    "days_short":   ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    "months_long":  ["", "January", "February", "March", "April", "May", "June",
+                     "July", "August", "September", "October", "November", "December"],
+    "months_short": ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  },
+
+  "de": {
+    "_name": "Deutsch",
+    "_code": "DE",
+
+    "card_session_title": "Sitzung",
+    "card_weekly_title":  "Wöchentlich",
+    "card_budget_title":  "Monatsbudget",
+
+    "tooltip_session": "Aktuelle Sitzung (gleitendes 5-Stunden-Limit)",
+    "tooltip_weekly":  "Wöchentliche Limits (gleitendes 7-Tage-Fenster)",
+    "tooltip_budget":  "Zusätzliche Nutzung (monatliches Überschreitungsbudget)",
+
+    "reset_in":       "Reset: {t}",
+    "no_limit":       "Kein Limit aktiv",
+    "budget_spent":   "Verbrauch: {x} / {y} {cur}",
+    "budget_balance": "Saldo: {x} {cur}",
+
+    "status_connecting":    "● Verbindung...",
+    "status_refreshing":    "● Aktualisierung...",
+    "status_restarting":    "● Neustart...",
+    "status_ok":            "● System betriebsbereit",
+    "status_expired":       "🔒 Sitzung abgelaufen → Erweiterung neu starten",
+    "status_no_org":        "⚠️ Organisation nicht gefunden",
+    "status_conn_error":    "❌ Verbindungsfehler",
+    "status_api_error":     "⚠️ API-Fehler {code}",
+    "status_network_error": "📡 Netzwerkfehler",
+
+    "tooltip_refresh":     "Aktualisieren",
+    "tooltip_settings":    "Einstellungen",
+    "tooltip_about":       "Über",
+    "tooltip_quit":        "Beenden",
+    "tooltip_refresh_btn": "Claude-Kontingente aktualisieren",
+
+    "tray_show":    "Anzeigen",
+    "tray_refresh": "Aktualisieren",
+    "tray_quit":    "Beenden",
+
+    "settings_title":         "⚙   Einstellungen",
+    "settings_sk_title":      "Sitzungsschlüssel",
+    "settings_method1":       "1.  Automatisch  (empfohlen)",
+    "settings_method1_desc":  "Aktiviere die Erweiterung \"Claude Session Helper\" in deinem Browser.",
+    "settings_open_guide":    "↗  Installationsguide öffnen",
+    "settings_method2":       "2.  Manuell",
+    "settings_method2_desc":  "F12  ›  Application  ›  Cookies  ›  https://claude.ai  ›  SessionKey",
+    "settings_open_claudeai": "↗  claude.ai öffnen",
+    "settings_save":          "Speichern & Neustarten",
+    "settings_lang_label":    "Sprache",
+    "settings_currency_label":"Währung",
+    "settings_currency_other":"Andere:",
+
+    "info_title":   "🅻🅶   Über",
+    "info_version": "Version",
+    "info_date":    "Datum",
+    "info_author":  "Autor",
+    "info_close":   "Schließen",
+
+    "unit_hour": "Std.",
+    "unit_min":  "Min.",
+    "unit_day":  "T.",
+
+    "date_at": "um",
+    "days_long":    ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"],
+    "days_short":   ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
+    "months_long":  ["", "Januar", "Februar", "März", "April", "Mai", "Juni",
+                     "Juli", "August", "September", "Oktober", "November", "Dezember"],
+    "months_short": ["", "Jan.", "Feb.", "März", "Apr.", "Mai", "Juni",
+                     "Juli", "Aug.", "Sep.", "Okt.", "Nov.", "Dez."]
+  },
+
+  "it": {
+    "_name": "Italiano",
+    "_code": "IT",
+
+    "card_session_title": "Sessione",
+    "card_weekly_title":  "Settimanale",
+    "card_budget_title":  "Budget mensile",
+
+    "tooltip_session": "Sessione corrente (limite rotante di 5h)",
+    "tooltip_weekly":  "Limiti settimanali (finestra rotante di 7 giorni)",
+    "tooltip_budget":  "Utilizzo aggiuntivo (budget mensile di eccedenza)",
+
+    "reset_in":       "Reset: {t}",
+    "no_limit":       "Nessun limite",
+    "budget_spent":   "Consumo: {x} / {y} {cur}",
+    "budget_balance": "Saldo: {x} {cur}",
+
+    "status_connecting":    "● Connessione...",
+    "status_refreshing":    "● Aggiornamento...",
+    "status_restarting":    "● Riavvio...",
+    "status_ok":            "● Sistema operativo",
+    "status_expired":       "🔒 Sessione scaduta → riavvia estensione",
+    "status_no_org":        "⚠️ Organizzazione non trovata",
+    "status_conn_error":    "❌ Errore di connessione",
+    "status_api_error":     "⚠️ Errore API {code}",
+    "status_network_error": "📡 Errore di rete",
+
+    "tooltip_refresh":     "Aggiorna",
+    "tooltip_settings":    "Impostazioni",
+    "tooltip_about":       "Informazioni",
+    "tooltip_quit":        "Chiudi",
+    "tooltip_refresh_btn": "Aggiorna le quote Claude",
+
+    "tray_show":    "Mostra",
+    "tray_refresh": "Aggiorna",
+    "tray_quit":    "Esci",
+
+    "settings_title":         "⚙   Impostazioni",
+    "settings_sk_title":      "Chiave di sessione",
+    "settings_method1":       "1.  Metodo automatico  (consigliato)",
+    "settings_method1_desc":  "Attiva l'estensione \"Claude Session Helper\" nel tuo browser.",
+    "settings_open_guide":    "↗  Apri la guida",
+    "settings_method2":       "2.  Manuale",
+    "settings_method2_desc":  "F12  ›  Application  ›  Cookies  ›  https://claude.ai  ›  SessionKey",
+    "settings_open_claudeai": "↗  Apri claude.ai",
+    "settings_save":          "Salva & Riavvia",
+    "settings_lang_label":    "Lingua",
+    "settings_currency_label":"Valuta",
+    "settings_currency_other":"Altra:",
+
+    "info_title":   "🅻🅶   Informazioni",
+    "info_version": "Versione",
+    "info_date":    "Data",
+    "info_author":  "Autore",
+    "info_close":   "Chiudi",
+
+    "unit_hour": "h",
+    "unit_min":  "min",
+    "unit_day":  "g",
+
+    "date_at": "alle",
+    "days_long":    ["lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato", "domenica"],
+    "days_short":   ["lun", "mar", "mer", "gio", "ven", "sab", "dom"],
+    "months_long":  ["", "gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno",
+                     "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"],
+    "months_short": ["", "gen", "feb", "mar", "apr", "mag", "giu",
+                     "lug", "ago", "set", "ott", "nov", "dic"]
+  },
+
+  "es": {
+    "_name": "Español",
+    "_code": "ES",
+
+    "card_session_title": "Sesión",
+    "card_weekly_title":  "Semanal",
+    "card_budget_title":  "Presupuesto",
+
+    "tooltip_session": "Sesión actual (límite rotante de 5h)",
+    "tooltip_weekly":  "Límites semanales (ventana rotante de 7 días)",
+    "tooltip_budget":  "Uso adicional (presupuesto mensual de exceso)",
+
+    "reset_in":       "Reset: {t}",
+    "no_limit":       "Sin límite",
+    "budget_spent":   "Consumo: {x} / {y} {cur}",
+    "budget_balance": "Saldo: {x} {cur}",
+
+    "status_connecting":    "● Conectando...",
+    "status_refreshing":    "● Actualizando...",
+    "status_restarting":    "● Reiniciando...",
+    "status_ok":            "● Sistema operativo",
+    "status_expired":       "🔒 Sesión expirada → reinicia la extensión",
+    "status_no_org":        "⚠️ Organización no encontrada",
+    "status_conn_error":    "❌ Error de conexión",
+    "status_api_error":     "⚠️ Error API {code}",
+    "status_network_error": "📡 Error de red",
+
+    "tooltip_refresh":     "Actualizar",
+    "tooltip_settings":    "Ajustes",
+    "tooltip_about":       "Acerca de",
+    "tooltip_quit":        "Cerrar",
+    "tooltip_refresh_btn": "Actualizar cuotas de Claude",
+
+    "tray_show":    "Mostrar",
+    "tray_refresh": "Actualizar",
+    "tray_quit":    "Salir",
+
+    "settings_title":         "⚙   Ajustes",
+    "settings_sk_title":      "Clave de sesión",
+    "settings_method1":       "1.  Automático  (recomendado)",
+    "settings_method1_desc":  "Activa la extensión \"Claude Session Helper\" en tu navegador.",
+    "settings_open_guide":    "↗  Abrir guía",
+    "settings_method2":       "2.  Manual",
+    "settings_method2_desc":  "F12  ›  Application  ›  Cookies  ›  https://claude.ai  ›  SessionKey",
+    "settings_open_claudeai": "↗  Abrir claude.ai",
+    "settings_save":          "Guardar & Reiniciar",
+    "settings_lang_label":    "Idioma",
+    "settings_currency_label":"Divisa",
+    "settings_currency_other":"Otra:",
+
+    "info_title":   "🅻🅶   Acerca de",
+    "info_version": "Versión",
+    "info_date":    "Fecha",
+    "info_author":  "Autor",
+    "info_close":   "Cerrar",
+
+    "unit_hour": "h",
+    "unit_min":  "min",
+    "unit_day":  "d",
+
+    "date_at": "a las",
+    "days_long":    ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"],
+    "days_short":   ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"],
+    "months_long":  ["", "enero", "febrero", "marzo", "abril", "mayo", "junio",
+                     "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"],
+    "months_short": ["", "ene", "feb", "mar", "abr", "may", "jun",
+                     "jul", "ago", "sep", "oct", "nov", "dic"]
+  }
+}

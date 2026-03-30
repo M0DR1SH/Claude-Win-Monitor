@@ -1,5 +1,37 @@
 # CHANGELOG — Claude-Win-Monitor
 
+## v1.9.1 — Guide d'installation bilingue HTML — 30/03/2026
+
+### Guide d'installation (Phase 5 — rework complet)
+
+- **`guide_installation/01-INSTALLATION.html`** — guide unique bilingue FR/EN (remplace `.md` + `.html` + `.pdf` séparés)
+- **Toggle FR/EN** sticky en haut de page avec drapeaux PNG natifs (`flag-fr.png`, `flag-en.png`)
+- **Sidebar "Sur cette page / On this page"** sticky à droite — suivi de position au scroll avec états : passé (atténué), courant (orange), à venir (gris)
+- **13 sections** complètes : prérequis, archive, antivirus, installation, exclusion AV, fenêtre principale, extension navigateur, premier lancement, paramètres, informations, icône tray, mise à jour, désinstallation
+- **Illustrations** : boutons à taille réelle (56×56 px pour la barre du bas, 26px inline), badges sync_ok/sync_pb, captures installation + extension
+- **Footer** avec 3 icônes cliquables + tooltips (IA Mastery, Profil LG, Buy Me A Coffee)
+- **Favicon** `favicon.ico`
+- **`_open_guide()`** mis à jour : pointe vers `guide_installation/01-INSTALLATION.html#fr-7` (ou `#en-7`) — ancre directe sur la section "Extension navigateur"
+- **Nuitka** : `--include-data-dir="guide_extension=guide_extension"` remplacé par `--include-data-dir="guide_installation=guide_installation"`
+- Fichiers obsolètes supprimés : `guide_installation/Guide d'installation.md/.html/.pdf`
+
+---
+
+## v1.9.1 — Interface multilingue & devises — 28/03/2026
+
+### Internationalisation (i18n)
+
+- **Interface multilingue** : FR / EN / DE / IT / ES — sélecteur dans les Paramètres avec drapeaux 28×20 px
+- **Sélecteur de devise** : €, $ ou symbole libre (1–3 caractères) — entrée limitée par `validatecommand`
+- **Fichier `translations.json`** externe (52 clés × 5 langues) — chargé au démarrage via `class I18n`
+- **Redémarrage automatique** à la validation des paramètres — compatible script et exe Nuitka (`subprocess.Popen + sys.exit`)
+- **Formatage des dates et durées** entièrement localisé (noms de jours/mois via `I18n`)
+- **Menu tray** localisé (Afficher / Actualiser / Quitter)
+- **InfoDialog** : lien auteur préfixé `↗ ` pour cohérence avec la fenêtre Paramètres
+- **Build Nuitka** : ajout `--include-data-files` pour `translations.json` + 5 drapeaux PNG
+
+---
+
 ## v1.8.4 — build exécutable Windows — 19-20/03/2026
 
 ### Packaging (Phases 1–3)

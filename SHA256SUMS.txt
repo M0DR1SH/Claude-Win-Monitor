@@ -1,0 +1,34 @@
+================================================================================
+  SHA-256 — Claude Win Monitor v1.9.1
+================================================================================
+
+  FR  Comment vérifier (PowerShell) :
+      > Get-FileHash "Claude-Win-Monitor-Setup.exe" -Algorithm SHA256
+
+  FR  Comment vérifier (invite de commandes) :
+      > certutil -hashfile "Claude-Win-Monitor-Setup.exe" SHA256
+
+  EN  How to verify (PowerShell):
+      > Get-FileHash "Claude-Win-Monitor-Setup.exe" -Algorithm SHA256
+
+  EN  How to verify (Command Prompt):
+      > certutil -hashfile "Claude-Win-Monitor-Setup.exe" SHA256
+
+--------------------------------------------------------------------------------
+
+  Claude-Win-Monitor-Setup.exe
+  [à compléter après build / to be filled after build]
+
+  ClaudeWinMonitor.exe
+  [à compléter après build / to be filled after build]
+
+  translations.json
+  [à compléter après build / to be filled after build]
+
+--------------------------------------------------------------------------------
+
+  FR  Vérification indépendante (VirusTotal) :
+  EN  Independent verification (VirusTotal):
+  https://cutt.ly/BtPYKplu
+
+================================================================================

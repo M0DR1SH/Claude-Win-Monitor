@@ -4,7 +4,7 @@ Moniteur de quotas Claude en temps réel pour Windows.
 Affiche la consommation de session (5h), hebdomadaire (7j) et le budget mensuel.
 
 **Auteur :** Laurent Gérard
-**Version courante : v1.8.4**
+**Version courante : v1.9.1**
 **Licence :** open source — code source intégralement disponible dans ce dépôt
 
 ---

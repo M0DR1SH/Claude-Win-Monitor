@@ -1,5 +1,5 @@
 # ===============================================================
-# CLAUDE-WIN-MONITOR v1.8.4
+# CLAUDE-WIN-MONITOR v1.9.1
 # 🅻🅶's Claude Usage Monitor pour suivre les quotas Anthropic
 # Auteur  : 🅻🅶 @ IA Mastery
 # Date    : 18/03/2026
@@ -65,11 +65,12 @@ _DATA_DIR.mkdir(parents=True, exist_ok=True)
 BASE_URL             = "https://claude.ai/api"   # base des endpoints API
 REFRESH_RATE_SECONDS = 300                        # intervalle auto-refresh (5 min)
 CONFIG_FILE          = str(_DATA_DIR / "claude_monitor_config.json")
+TRANSLATIONS_FILE    = os.path.join(_HERE, "translations.json")
 
 APP_NAME    = "Claude Usage Monitor"
 APP_AUTHOR  = "🅻🅶 @ IA Mastery"
-APP_VERSION = "v1.8.4"
-APP_DATE    = "18/03/2026"
+APP_VERSION = "v1.9.1"
+APP_DATE    = "28/03/2026"
 
 # ── PALETTE DE COULEURS ──────────────────────────────────────────────────────
 # Trois niveaux d'alerte : safe (vert) / warn (orange) / crit (rouge)
@@ -165,6 +166,17 @@ class Tooltip:
 
 # ── UTILITAIRES ──────────────────────────────────────────────────────────────
 
+def _load_flag(code: str, size=(28, 20)):
+    """Charge le drapeau PNG correspondant au code langue (flag-fr.png, flag-en.png, …).
+    Retourne un CTkImage 28×20 prêt à l'emploi, ou None si le fichier est introuvable."""
+    path = os.path.join(_HERE, f"flag-{code}.png")
+    try:
+        img = Image.open(path).convert("RGB")
+        return ctk.CTkImage(img, size=size)
+    except Exception:
+        return None   # fallback silencieux → le bouton affiche uniquement le code texte
+
+
 def _load_icon(path, color_hex, size=(22, 22)):
     """Charge un PNG blanc sur fond transparent et le teinte dans la couleur souhaitée.
     Retourne un CTkImage prêt à l'emploi, ou None si le fichier est introuvable."""
@@ -183,24 +195,25 @@ def _load_icon(path, color_hex, size=(22, 22)):
 
 
 def format_date_long(iso_date_str):
-    """Retourne la date au format long : 'mercredi 18 mars à 15h'."""
+    """Retourne la date au format long localisé : 'mercredi 18 mars à 15h' (FR)."""
     if not iso_date_str:
         return ""
     try:
         import datetime as _dt
         dt     = dateutil.parser.isoparse(iso_date_str).astimezone()
-        days   = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
-        months = ["", "janvier", "février", "mars", "avril", "mai", "juin",
-                  "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
-        return f"{days[dt.weekday()]} {dt.day} {months[dt.month]} à {dt.hour}h"
+        days   = I18n.days_long()   or ["lundi","mardi","mercredi","jeudi","vendredi","samedi","dimanche"]
+        months = I18n.months_long() or ["","janvier","février","mars","avril","mai","juin",
+                                         "juillet","août","septembre","octobre","novembre","décembre"]
+        at = I18n.date_at() or "à"
+        return f"{days[dt.weekday()]} {dt.day} {months[dt.month]} {at} {dt.hour}h"
     except Exception:
         return ""
 
 
 def format_time_remaining(iso_date_str, include_days=False):
-    """Retourne le temps restant avant la date donnée.
-    include_days=False → 'Xh YYm'   (session 5h)
-    include_days=True  → 'Wj Xh YYm' (hebdomadaire)"""
+    """Retourne le temps restant avant la date donnée, dans la langue courante.
+    include_days=False → '2h 30min'       (session 5h)
+    include_days=True  → '1j 2h 30min'    (hebdomadaire)"""
     if not iso_date_str:
         return "—"
     try:
@@ -208,41 +221,45 @@ def format_time_remaining(iso_date_str, include_days=False):
         dt        = dateutil.parser.isoparse(iso_date_str).astimezone()
         now       = _dt.datetime.now(tz=dt.tzinfo)
         total_sec = int((dt - now).total_seconds())
+        h_u = I18n.t("unit_hour")
+        m_u = I18n.t("unit_min")
+        d_u = I18n.t("unit_day")
         if total_sec <= 0:
-            return "0h 00m"
+            return f"0{h_u} 00{m_u}"
         total_min = total_sec // 60
         if include_days:
             days  = total_min // (24 * 60)
             rem   = total_min % (24 * 60)
             hours = rem // 60
             mins  = rem % 60
-            return f"{days}j {hours}h {mins:02d}m"
+            return f"{days}{d_u} {hours}{h_u} {mins:02d}{m_u}"
         else:
             hours = total_min // 60
             mins  = total_min % 60
-            return f"{hours}h {mins:02d}m"
+            return f"{hours}{h_u} {mins:02d}{m_u}"
     except Exception:
         return "—"
 
 
-def format_date_french(iso_date_str):
-    """Convertit une date ISO 8601 (UTC ou avec offset) en texte français localisé.
-    Ex : '2026-02-28T10:00:01+00:00' → 'sam 28 févr à 11h00'"""
+def format_date_short(iso_date_str):
+    """Convertit une date ISO 8601 en texte court localisé.
+    Ex FR : 'sam 28 mars à 11h00' — Ex EN : 'Sat Mar 28 at 11:00'"""
     if not iso_date_str:
-        return "Date inconnue"
+        return "—"
     try:
         dt     = dateutil.parser.isoparse(iso_date_str).astimezone()
-        days   = ["lun", "mar", "mer", "jeu", "ven", "sam", "dim"]
-        months = ["", "janv", "fév", "mars", "avr", "mai", "juin",
-                  "juil", "août", "sept", "oct", "nov", "déc"]
-        return f"{days[dt.weekday()]} {dt.day} {months[dt.month]} à {dt.hour}h{dt.minute:02d}"
+        days   = I18n.days_short()   or ["lun","mar","mer","jeu","ven","sam","dim"]
+        months = I18n.months_short() or ["","janv","fév","mars","avr","mai","juin",
+                                          "juil","août","sept","oct","nov","déc"]
+        at = I18n.date_at() or "à"
+        return f"{days[dt.weekday()]} {dt.day} {months[dt.month]} {at} {dt.hour}h{dt.minute:02d}"
     except Exception:
-        return "Erreur date"
+        return "—"
 
 
 class ConfigManager:
     """Gestion du fichier de configuration local (JSON).
-    Contenu : session_key (cookie claude.ai) + org_id (UUID organisation)."""
+    Contenu : session_key, org_id, language, currency."""
 
     @staticmethod
     def load():
@@ -256,14 +273,133 @@ class ConfigManager:
         return {}
 
     @staticmethod
-    def save(session_key, org_id=None):
-        """Sauvegarde la sessionKey et optionnellement l'org_id.
-        L'org_id est mis en cache pour éviter de rappeler /bootstrap à chaque démarrage."""
-        data = {"session_key": session_key}
-        if org_id:
+    def save(session_key, org_id=None, language=None, currency=None):
+        """Sauvegarde la sessionKey et les champs optionnels.
+        Charge l'existant d'abord pour ne pas écraser language/currency/org_id."""
+        data = ConfigManager.load()
+        data["session_key"] = session_key
+        if org_id is not None:
             data["org_id"] = org_id
+        if language is not None:
+            data["language"] = language
+        if currency is not None:
+            data["currency"] = currency
         with open(CONFIG_FILE, 'w') as f:
             json.dump(data, f)
+
+    @staticmethod
+    def save_locale(language=None, currency=None):
+        """Sauvegarde uniquement la langue et/ou la devise (sans toucher à session_key)."""
+        data = ConfigManager.load()
+        if language is not None:
+            data["language"] = language
+        if currency is not None:
+            data["currency"] = currency
+        with open(CONFIG_FILE, 'w') as f:
+            json.dump(data, f)
+
+
+# ── INTERNATIONALISATION ──────────────────────────────────────────────────────
+
+class I18n:
+    """Gestionnaire de traductions multilingues.
+
+    Charge translations.json au démarrage et expose :
+      - I18n.t("clé")                → chaîne traduite (langue courante)
+      - I18n.t("clé", x=1.2, cur="€") → chaîne traduite avec substitutions
+      - I18n.lang()                  → code langue courant ("fr", "en", …)
+      - I18n.currency()              → symbole devise courant ("€", "$", …)
+      - I18n.available()             → liste des codes langues disponibles
+      - I18n.name(code)              → nom humain d'une langue ("Français", …)
+      - I18n.days_long()             → liste des noms de jours complets (lun=0)
+      - I18n.days_short()            → liste des noms de jours abrégés
+      - I18n.months_long()           → liste des noms de mois complets (idx 1..12)
+      - I18n.months_short()          → liste des noms de mois abrégés
+      - I18n.date_at()               → préposition "à" / "at" / "um" / …
+    """
+    _data:     dict = {}
+    _lang:     str  = "fr"
+    _currency: str  = "€"
+
+    @classmethod
+    def load(cls, path: str, lang: str = "fr", currency: str = "€") -> None:
+        """Charge le fichier translations.json. Silencieux si le fichier est absent."""
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                cls._data = json.load(f)
+        except Exception:
+            cls._data = {}
+        cls._lang     = lang if lang in cls._data else "fr"
+        cls._currency = currency or "€"
+
+    @classmethod
+    def t(cls, key: str, **kwargs) -> str:
+        """Retourne la chaîne traduite pour `key` dans la langue courante.
+        Les kwargs sont injectés via str.format_map() — ex: I18n.t("reset_in", t="2h 30min")."""
+        lang_data = cls._data.get(cls._lang) or cls._data.get("fr") or {}
+        s = lang_data.get(key, key)   # fallback sur la clé si absente
+        if kwargs:
+            try:
+                s = s.format_map(kwargs)
+            except (KeyError, IndexError, ValueError):
+                pass
+        return s
+
+    # ── Accesseurs ─────────────────────────────────────────────────────────
+
+    @classmethod
+    def lang(cls) -> str:
+        return cls._lang
+
+    @classmethod
+    def set_lang(cls, code: str) -> None:
+        if code in cls._data:
+            cls._lang = code
+
+    @classmethod
+    def currency(cls) -> str:
+        return cls._currency
+
+    @classmethod
+    def set_currency(cls, symbol: str) -> None:
+        cls._currency = symbol or "€"
+
+    @classmethod
+    def available(cls) -> list:
+        """Retourne la liste des codes de langues disponibles (exclut _meta)."""
+        return [k for k in cls._data if not k.startswith("_")]
+
+    @classmethod
+    def name(cls, code: str) -> str:
+        """Retourne le nom humain d'un code langue, ex. "fr" → "Français"."""
+        return cls._data.get(code, {}).get("_name", code.upper())
+
+    @classmethod
+    def code_label(cls, code: str) -> str:
+        """Retourne le label court d'un code langue, ex. "fr" → "FR"."""
+        return cls._data.get(code, {}).get("_code", code.upper())
+
+    # ── Helpers date/temps ─────────────────────────────────────────────────
+
+    @classmethod
+    def days_long(cls) -> list:
+        return cls._data.get(cls._lang, {}).get("days_long", [])
+
+    @classmethod
+    def days_short(cls) -> list:
+        return cls._data.get(cls._lang, {}).get("days_short", [])
+
+    @classmethod
+    def months_long(cls) -> list:
+        return cls._data.get(cls._lang, {}).get("months_long", [""] * 13)
+
+    @classmethod
+    def months_short(cls) -> list:
+        return cls._data.get(cls._lang, {}).get("months_short", [""] * 13)
+
+    @classmethod
+    def date_at(cls) -> str:
+        return cls._data.get(cls._lang, {}).get("date_at", "at")
 
 
 # ── FENÊTRES MODALES (base commune) ──────────────────────────────────────────
@@ -362,20 +498,21 @@ class _BaseDialog(ctk.CTkToplevel):
 # ── FENÊTRE PARAMÈTRES ───────────────────────────────────────────────────────
 
 class SettingsDialog(_BaseDialog):
-    """Fenêtre de configuration de la sessionKey.
+    """Fenêtre de configuration : sessionKey, langue, devise.
 
     Présente deux méthodes d'authentification :
       ① Automatique — via l'extension navigateur "Claude Session Helper"
       ② Manuelle    — copier-coller depuis F12 > Application > Cookies > claude.ai
+    Propose également le sélecteur de langue (FR/EN/DE/IT/ES) et de devise.
     """
 
     def __init__(self, parent, current_key):
-        super().__init__(parent, "⚙   Paramètres", 460, 420)
+        super().__init__(parent, I18n.t("settings_title"), 460, 420)
         self._parent_app = parent
 
-        # Titre principal
+        # ── Titre section Session Key ──────────────────────────────────────
         ctk.CTkLabel(
-            self.content, text="Clé de Session",
+            self.content, text=I18n.t("settings_sk_title"),
             font=("Segoe UI", 15, "bold"), anchor="w"
         ).pack(anchor="w", pady=(0, 12))
 
@@ -386,16 +523,15 @@ class SettingsDialog(_BaseDialog):
         inner1.pack(fill="x", padx=14, pady=12)
 
         ctk.CTkLabel(
-            inner1, text="1.  Méthode automatique  (recommandée)",
+            inner1, text=I18n.t("settings_method1"),
             font=("Segoe UI", 12, "bold"), text_color=COLOR_SAFE, anchor="w"
         ).pack(anchor="w")
         ctk.CTkLabel(
-            inner1,
-            text="Activez l'extension  \"Claude Session Helper\"  dans votre navigateur.",
+            inner1, text=I18n.t("settings_method1_desc"),
             font=("Segoe UI", 12), text_color="#7aad7a", anchor="w", wraplength=380
         ).pack(anchor="w", pady=(4, 5))
         ctk.CTkButton(
-            inner1, text="↗  Ouvrir le guide d'installation",
+            inner1, text=I18n.t("settings_open_guide"),
             command=self._open_guide,
             fg_color="transparent", hover_color="#1e4d2e",
             text_color=COLOR_SAFE, font=("Segoe UI", 12),
@@ -413,67 +549,193 @@ class SettingsDialog(_BaseDialog):
         inner2.pack(fill="x", padx=14, pady=12)
 
         ctk.CTkLabel(
-            inner2, text="2.  Méthode manuelle",
+            inner2, text=I18n.t("settings_method2"),
             font=("Segoe UI", 12, "bold"), text_color=COLOR_BLUE, anchor="w"
         ).pack(anchor="w")
         ctk.CTkLabel(
-            inner2,
-            text="F12  ›  Application  ›  Cookies  ›  https://claude.ai  ›  sessionKey",
+            inner2, text=I18n.t("settings_method2_desc"),
             font=("Segoe UI", 11), text_color="#5588aa", anchor="w"
         ).pack(anchor="w", pady=(4, 5))
         ctk.CTkButton(
-            inner2, text="↗  Ouvrir claude.ai",
+            inner2, text=I18n.t("settings_open_claudeai"),
             command=lambda: webbrowser.open("https://claude.ai"),
             fg_color="transparent", hover_color="#1a3a5c",
             text_color=COLOR_BLUE, font=("Segoe UI", 12),
             anchor="w", height=24, corner_radius=4
         ).pack(anchor="w")
 
-        # Champ de saisie de la sessionKey (méthode manuelle)
+        # Champ de saisie de la sessionKey
         self.key_entry = ctk.CTkEntry(
             self.content, height=38,
             placeholder_text="sk-ant-sid01-...",
             font=("Segoe UI", 12)
         )
         self.key_entry.insert(0, current_key)
-        self.key_entry.pack(fill="x", pady=(0, 10))
+        self.key_entry.pack(fill="x", pady=(0, 12))
 
+        # ── Séparateur ────────────────────────────────────────────────────
+        ctk.CTkFrame(self.content, height=1, fg_color="#2a2a2a",
+                     corner_radius=0).pack(fill="x", pady=(0, 14))
+
+        # ── Sélecteur de langue ───────────────────────────────────────────
+        lang_row = ctk.CTkFrame(self.content, fg_color="transparent")
+        lang_row.pack(fill="x", pady=(0, 10))
+        ctk.CTkLabel(
+            lang_row, text=I18n.t("settings_lang_label"),
+            font=("Segoe UI", 12), text_color="#888", width=58, anchor="w"
+        ).pack(side="left")
+
+        # ── 5 boutons drapeau + code (remplace CTkSegmentedButton) ───────────
+        # Chaque bouton : drapeau 28×20 au-dessus du code 2 lettres (compound="top")
+        # Sélection : fond bleu sur le bouton actif, transparent sur les autres
+        self._lang_codes    = I18n.available()
+        self._selected_lang = I18n.lang()
+        self._lang_buttons  = {}
+
+        # Conteneur commun — fond légèrement visible, coins arrondis globaux
+        lang_frame = ctk.CTkFrame(lang_row, fg_color="#252525", corner_radius=6)
+        lang_frame.pack(side="left")
+
+        for i, code in enumerate(self._lang_codes):
+            flag_img = _load_flag(code)   # CTkImage 28×20 ou None si fichier absent
+            is_first = (i == 0)
+            is_last  = (i == len(self._lang_codes) - 1)
+            # Coins arrondis sur les extrémités du groupe, plats au milieu
+            cr = 6 if (is_first or is_last) else 0
+            btn = ctk.CTkButton(
+                lang_frame,
+                image=flag_img,
+                text=I18n.code_label(code),
+                compound="top",             # drapeau au-dessus du code "FR"/"EN"/…
+                width=54, height=46,
+                fg_color=COLOR_BLUE if code == self._selected_lang else "transparent",
+                hover_color="#2a6ad0",
+                text_color="#ddd",
+                corner_radius=cr,
+                font=("Segoe UI", 10, "bold"),
+                command=lambda c=code: self._select_lang(c),
+            )
+            btn.pack(side="left", padx=0)
+            self._lang_buttons[code] = btn
+
+        # ── Sélecteur de devise ───────────────────────────────────────────
+        cur_row = ctk.CTkFrame(self.content, fg_color="transparent")
+        cur_row.pack(fill="x", pady=(0, 14))
+        ctk.CTkLabel(
+            cur_row, text=I18n.t("settings_currency_label"),
+            font=("Segoe UI", 12), text_color="#888", width=58, anchor="w"
+        ).pack(side="left")
+
+        cur_btns = ctk.CTkFrame(cur_row, fg_color="transparent")
+        cur_btns.pack(side="left")
+
+        cur = I18n.currency()
+        self._cur_var = cur if cur in ("€", "$") else ""
+
+        self._btn_eur = ctk.CTkButton(
+            cur_btns, text="€", width=38, height=32,
+            font=("Segoe UI", 14, "bold"),
+            fg_color=COLOR_BLUE if cur == "€" else "#252525",
+            hover_color="#2a6ad0", text_color="#fff", corner_radius=6,
+            command=lambda: self._select_currency("€")
+        )
+        self._btn_eur.pack(side="left", padx=(0, 4))
+
+        self._btn_usd = ctk.CTkButton(
+            cur_btns, text="$", width=38, height=32,
+            font=("Segoe UI", 14, "bold"),
+            fg_color=COLOR_BLUE if cur == "$" else "#252525",
+            hover_color="#2a6ad0", text_color="#fff", corner_radius=6,
+            command=lambda: self._select_currency("$")
+        )
+        self._btn_usd.pack(side="left", padx=(0, 10))
+
+        ctk.CTkLabel(
+            cur_btns, text=I18n.t("settings_currency_other"),
+            font=("Segoe UI", 11), text_color="#666"
+        ).pack(side="left", padx=(0, 5))
+
+        # validate="key" + validatecommand bloque toute saisie au-delà de 3 caractères
+        # %P = valeur APRÈS l'édition proposée (chaîne résultante, pas le caractère seul)
+        vcmd = (self.register(lambda P: len(P) <= 3), "%P")
+        self._cur_entry = ctk.CTkEntry(
+            cur_btns, width=54, height=32,
+            font=("Segoe UI", 13), placeholder_text="CHF",
+            validate="key", validatecommand=vcmd
+        )
+        if cur not in ("€", "$"):
+            self._cur_entry.insert(0, cur)
+        self._cur_entry.pack(side="left")
+        self._cur_entry.bind("<FocusIn>", self._on_custom_currency_focus)
+
+        # ── Bouton Sauvegarder & Relancer ─────────────────────────────────
         ctk.CTkButton(
-            self.content, text="Sauvegarder & Relancer",
-            command=self.save_and_close,
+            self.content, text=I18n.t("settings_save"),
+            command=self.save_and_restart,
             fg_color=COLOR_BLUE, height=38,
             font=("Segoe UI", 13, "bold")
         ).pack(fill="x")
 
-        # Ajustement automatique de la hauteur après rendu complet
         self.after(50, self._auto_fit)
 
     def _auto_fit(self):
         """Ajuste la hauteur de la fenêtre à son contenu réel et recentre."""
         self.update_idletasks()
-        h  = self.winfo_reqheight() + 4   # +4px de marge
+        h  = self.winfo_reqheight() + 4
         sw = self.winfo_screenwidth()
         sh = self.winfo_screenheight()
         x  = max(0, (sw - 460) // 2)
         y  = max(0, (sh - h)  // 2)
         self.geometry(f"460x{h}+{x}+{y}")
 
+    def _select_currency(self, symbol):
+        """Sélectionne € ou $ et vide le champ personnalisé."""
+        self._cur_var = symbol
+        self._btn_eur.configure(fg_color=COLOR_BLUE if symbol == "€" else "#252525")
+        self._btn_usd.configure(fg_color=COLOR_BLUE if symbol == "$" else "#252525")
+        self._cur_entry.delete(0, "end")
+
+    def _on_custom_currency_focus(self, _=None):
+        """Désélectionne € et $ quand l'utilisateur clique dans le champ personnalisé."""
+        self._cur_var = ""
+        self._btn_eur.configure(fg_color="#252525")
+        self._btn_usd.configure(fg_color="#252525")
+
+    def _get_currency(self):
+        """Retourne la devise sélectionnée (entrée libre prioritaire sur boutons)."""
+        custom = self._cur_entry.get().strip()[:3]
+        return custom if custom else (self._cur_var or "€")
+
+    def _select_lang(self, code: str):
+        """Met à jour la sélection visuelle des boutons drapeaux."""
+        self._selected_lang = code
+        for c, btn in self._lang_buttons.items():
+            btn.configure(fg_color=COLOR_BLUE if c == code else "transparent")
+
+    def _get_language(self) -> str:
+        """Retourne le code langue du bouton actuellement sélectionné."""
+        return self._selected_lang
+
     def _open_guide(self):
-        """Ouvre le guide HTML local dans le navigateur par défaut.
-        Replie sur claude.ai si le fichier est introuvable."""
-        guide = os.path.join(_HERE, "guide_extension", "Guide d'installation.html")
+        """Ouvre le guide d'installation au chapitre Extension navigateur."""
+        lang = self._get_language()
+        anchor = "#fr-7" if lang == "fr" else "#en-7"
+        guide = os.path.join(_HERE, "guide_installation", "01-INSTALLATION.html")
         if os.path.exists(guide):
-            webbrowser.open(f"file:///{guide.replace(os.sep, '/')}")
+            webbrowser.open(f"file:///{guide.replace(os.sep, '/')}{anchor}")
         else:
             webbrowser.open("https://claude.ai")
 
-    def save_and_close(self):
-        """Sauvegarde la clé saisie manuellement et relance la connexion."""
-        new_key = self.key_entry.get().strip()
+    def save_and_restart(self):
+        """Sauvegarde la config (clé, langue, devise) et relance l'application."""
+        new_key  = self.key_entry.get().strip()
+        new_lang = self._get_language()
+        new_cur  = self._get_currency()
         if new_key:
-            ConfigManager.save(new_key)
-            self._parent_app.reload_app()
-            self.destroy()
+            ConfigManager.save(new_key, language=new_lang, currency=new_cur)
+        else:
+            ConfigManager.save_locale(language=new_lang, currency=new_cur)
+        self._parent_app._restart_app()
 
 
 # ── FENÊTRE À PROPOS ─────────────────────────────────────────────────────────
@@ -483,7 +745,7 @@ class InfoDialog(_BaseDialog):
     _AUTHOR_URL = "https://www.skool.com/@laurent-gerard-1911?g=ia-mastery"
 
     def __init__(self, parent):
-        super().__init__(parent, "🅻🅶   À propos", 340, 305)
+        super().__init__(parent, I18n.t("info_title"), 340, 305)
 
         # Ligne logo + nom de l'app
         top = ctk.CTkFrame(self.content, fg_color="transparent")
@@ -506,8 +768,8 @@ class InfoDialog(_BaseDialog):
         tbl = ctk.CTkFrame(self.content, fg_color="#212121", corner_radius=8)
         tbl.pack(fill="x", pady=(0, 14))
 
-        for i, (label, value) in enumerate([("Version", APP_VERSION),
-                                            ("Date",    APP_DATE)]):
+        for i, (label, value) in enumerate([(I18n.t("info_version"), APP_VERSION),
+                                            (I18n.t("info_date"),    APP_DATE)]):
             row = ctk.CTkFrame(tbl, fg_color="transparent")
             row.pack(fill="x", padx=14, pady=(8 if i == 0 else 4, 4))
             ctk.CTkLabel(row, text=label, width=70,
@@ -518,10 +780,10 @@ class InfoDialog(_BaseDialog):
         # Ligne auteur avec lien externe
         author_row = ctk.CTkFrame(tbl, fg_color="transparent")
         author_row.pack(fill="x", padx=14, pady=(4, 8))
-        ctk.CTkLabel(author_row, text="Auteur", width=70,
+        ctk.CTkLabel(author_row, text=I18n.t("info_author"), width=70,
                      font=("Segoe UI", 11), text_color="#666", anchor="w").pack(side="left")
         ctk.CTkButton(
-            author_row, text=APP_AUTHOR,
+            author_row, text=f"↗  {APP_AUTHOR}",
             font=("Segoe UI", 11), text_color=COLOR_BLUE,
             fg_color="transparent", hover_color="#1a2030",
             anchor="w", height=22, corner_radius=4,
@@ -529,7 +791,7 @@ class InfoDialog(_BaseDialog):
         ).pack(side="left")
 
         ctk.CTkButton(
-            self.content, text="Fermer", command=self.destroy,
+            self.content, text=I18n.t("info_close"), command=self.destroy,
             fg_color=COLOR_BLUE, height=34,
             font=("Segoe UI", 12, "bold")
         ).pack(fill="x")
@@ -671,6 +933,13 @@ class ClaudeMonitorApp(ctk.CTk):
         self.session_key = self.config.get("session_key", "")
         self.org_id      = self.config.get("org_id", "")
 
+        # Chargement des traductions (langue + devise depuis la config)
+        I18n.load(
+            TRANSLATIONS_FILE,
+            lang     = self.config.get("language", "fr"),
+            currency = self.config.get("currency", "€")
+        )
+
         # Session HTTP avec impersonation Chrome (contourne les vérifications User-Agent)
         self.session    = requests.Session(impersonate="chrome120")
         self.is_running      = True   # flag pour arrêter la boucle de refresh proprement
@@ -773,7 +1042,7 @@ class ClaudeMonitorApp(ctk.CTk):
         self.config      = ConfigManager.load()
         self.session_key = self.config.get("session_key", "")
         self.setup_session()
-        self.update_status("● Redémarrage...", "gray")
+        self.update_status(I18n.t("status_restarting"), "gray")
         threading.Thread(target=self.init_sequence, daemon=True).start()
 
     def setup_session(self):
@@ -809,10 +1078,10 @@ class ClaudeMonitorApp(ctk.CTk):
             img = Image.new("RGB", (64, 64), "#3b82f6")  # fallback carré bleu
 
         menu = pystray.Menu(
-            pystray.MenuItem("Afficher",   self._show_window,   default=True),
-            pystray.MenuItem("Actualiser", self._tray_refresh),
+            pystray.MenuItem(I18n.t("tray_show"),    self._show_window,   default=True),
+            pystray.MenuItem(I18n.t("tray_refresh"), self._tray_refresh),
             pystray.Menu.SEPARATOR,
-            pystray.MenuItem("Quitter",    self._quit_from_tray)
+            pystray.MenuItem(I18n.t("tray_quit"),    self._quit_from_tray)
         )
         self._tray = pystray.Icon("claude_monitor", img, "Claude Usage Monitor", menu)
         threading.Thread(target=self._tray.run, daemon=True).start()
@@ -845,6 +1114,20 @@ class ClaudeMonitorApp(ctk.CTk):
         if self._tray:
             self._tray.stop()
         self.after(0, self.destroy)
+
+    def _restart_app(self):
+        """Ferme et relance l'application (changement de langue ou de devise)."""
+        self.is_running = False
+        if self._tray:
+            try:
+                self._tray.stop()
+            except Exception:
+                pass
+        exe  = sys.executable
+        args = [exe] if getattr(sys, "frozen", False) else [exe] + sys.argv
+        import subprocess
+        subprocess.Popen(args)
+        self.after(100, lambda: sys.exit(0))
 
     # ── ÉPINGLE (TOUJOURS AU PREMIER PLAN) ────────────────────────────────────
 
@@ -979,7 +1262,7 @@ class ClaudeMonitorApp(ctk.CTk):
         self.status_frame = ctk.CTkFrame(info, fg_color=COLOR_SAFE_BG, corner_radius=20)
         self.status_frame.pack(anchor="w", pady=(4, 0))
         self.status_lbl = ctk.CTkLabel(
-            self.status_frame, text="● Connexion...",
+            self.status_frame, text=I18n.t("status_connecting"),
             font=("Segoe UI", 10, "bold"), text_color=COLOR_SAFE
         )
         self.status_lbl.pack(padx=10, pady=3)
@@ -998,7 +1281,7 @@ class ClaudeMonitorApp(ctk.CTk):
             corner_radius=10, font=("Segoe UI", 20, "bold")
         )
         btn_refresh.pack()
-        Tooltip(btn_refresh, "Actualiser les données")
+        Tooltip(btn_refresh, I18n.t("tooltip_refresh_btn"))
 
         # Séparateur header / cartes
         ctk.CTkFrame(root, height=1, fg_color="#242424").pack(fill="x", pady=(14, 0))
@@ -1008,9 +1291,9 @@ class ClaudeMonitorApp(ctk.CTk):
         cards.pack(fill="x", padx=14, pady=(12, 6))
         self._cards_frame = cards
 
-        self.card_session = self._make_card(cards, "Session en cours", "Limite glissante de 5h",              icon=self._icon_session)
-        self.card_weekly  = self._make_card(cards, "Hebdomadaire",      "Limite de 7 jours",                   icon=self._icon_hebdo)
-        self.card_billing = self._make_card(cards, "Budget mensuel",    "Budget mensuel supplémentaire déposé", icon=self._icon_portefeuille)
+        self.card_session = self._make_card(cards, I18n.t("card_session_title"), I18n.t("tooltip_session"), icon=self._icon_session)
+        self.card_weekly  = self._make_card(cards, I18n.t("card_weekly_title"),  I18n.t("tooltip_weekly"),  icon=self._icon_hebdo)
+        self.card_billing = self._make_card(cards, I18n.t("card_budget_title"),  I18n.t("tooltip_budget"),  icon=self._icon_portefeuille)
 
         # ── BARRE DU BAS (3 boutons + séparateurs) ────────────────────────────────
         # Packée EN DERNIER pour éviter les gaps liés à side="bottom".
@@ -1031,7 +1314,7 @@ class ClaudeMonitorApp(ctk.CTk):
             text_color="#888", font=("Segoe UI", 22), corner_radius=0
         )
         btn_settings.grid(row=0, column=0, sticky="nsew")
-        Tooltip(btn_settings, "Paramètres")
+        Tooltip(btn_settings, I18n.t("tooltip_settings"))
 
         ctk.CTkFrame(bottom, width=1, fg_color="#2a2a2a").grid(
             row=0, column=1, sticky="ns", pady=10
@@ -1045,7 +1328,7 @@ class ClaudeMonitorApp(ctk.CTk):
             text_color=COLOR_BLUE, font=("Segoe UI", 18, "bold"), corner_radius=0
         )
         btn_info_bar.grid(row=0, column=2, sticky="nsew")
-        Tooltip(btn_info_bar, "À propos de l'application")
+        Tooltip(btn_info_bar, I18n.t("tooltip_about"))
 
         ctk.CTkFrame(bottom, width=1, fg_color="#2a2a2a").grid(
             row=0, column=3, sticky="ns", pady=10
@@ -1059,7 +1342,7 @@ class ClaudeMonitorApp(ctk.CTk):
             text_color=COLOR_CRIT, font=("Segoe UI", 22), corner_radius=0
         )
         btn_quit.grid(row=0, column=4, sticky="nsew")
-        Tooltip(btn_quit, "Quitter l'application")
+        Tooltip(btn_quit, I18n.t("tooltip_quit"))
 
     def _make_card(self, parent, title, tooltip_text, icon=None):
         """Crée une carte statistique réutilisable pour afficher un quota (Session/Hebdo/Budget).
@@ -1199,10 +1482,10 @@ class ClaudeMonitorApp(ctk.CTk):
             if self.org_id:
                 self.background_loop()
             else:
-                self.update_status("⚠️ Organisation introuvable", COLOR_CRIT)
+                self.update_status(I18n.t("status_no_org"), COLOR_CRIT)
 
         except Exception:
-            self.update_status("❌ Erreur connexion", COLOR_CRIT)
+            self.update_status(I18n.t("status_conn_error"), COLOR_CRIT)
 
     def background_loop(self):
         """Boucle infinie (thread) : fetch_data() puis attente REFRESH_RATE_SECONDS.
@@ -1221,7 +1504,7 @@ class ClaudeMonitorApp(ctk.CTk):
     def fetch_data(self):
         """Appelle les 3 endpoints API en parallèle et met à jour l'UI.
         Gère les erreurs HTTP (403 = session expirée, autres = avertissement)."""
-        self.update_status("● Actualisation...", COLOR_WARN)
+        self.update_status(I18n.t("status_refreshing"), COLOR_WARN)
         try:
             r_usage   = self.session.get(
                 f"{BASE_URL}/organizations/{self.org_id}/usage", timeout=10)
@@ -1238,13 +1521,13 @@ class ClaudeMonitorApp(ctk.CTk):
             elif r_usage.status_code == 403 or r_limit.status_code == 403 or r_prepaid.status_code == 403:
                 # Session expirée → stopper la boucle et ouvrir les Paramètres
                 self._session_expired = True
-                self.update_status("🔒 Session expirée — relancer l'extension", COLOR_CRIT)
+                self.update_status(I18n.t("status_expired"), COLOR_CRIT)
                 self.after(0, self.open_settings)
             else:
-                self.update_status(f"⚠️ Erreur API {r_usage.status_code}", COLOR_WARN)
+                self.update_status(I18n.t("status_api_error", code=r_usage.status_code), COLOR_WARN)
 
         except Exception:
-            self.update_status("📡 Erreur réseau", COLOR_CRIT)
+            self.update_status(I18n.t("status_network_error"), COLOR_CRIT)
 
     def update_ui(self, usage, limits, prepaid):
         """Met à jour les 3 cartes avec les données reçues de l'API.
@@ -1274,10 +1557,13 @@ class ClaudeMonitorApp(ctk.CTk):
         card["bar"].set(max(min(ratio, 1.0), 0.004))
         card["bar"].configure(progress_color=color)
         card["p"].configure(text=f"{int(ratio * 100)}%", text_color=color)
-        card["reset_left"].configure(text=f"Conso : {used_month:.2f} / {limit_cap:.2f} €")
-        card["reset_right"].configure(text=f"Solde : {balance_real:.2f} €")
+        cur = I18n.currency()
+        card["reset_left"].configure(
+            text=I18n.t("budget_spent",   x=f"{used_month:.2f}",  y=f"{limit_cap:.2f}", cur=cur))
+        card["reset_right"].configure(
+            text=I18n.t("budget_balance", x=f"{balance_real:.2f}", cur=cur))
 
-        self.update_status("● Système Opérationnel", COLOR_SAFE)
+        self.update_status(I18n.t("status_ok"), COLOR_SAFE)
 
     def _update_bar_card(self, card, data, include_days=False):
         """Met à jour une carte session ou hebdo avec les données de l'API.
@@ -1295,10 +1581,10 @@ class ClaudeMonitorApp(ctk.CTk):
         card["p"].configure(text=f"{int(val)}%", text_color=color)
         if reset:
             card["reset_left"].configure(
-                text=f"Reset : {format_time_remaining(reset, include_days)}")
+                text=I18n.t("reset_in", t=format_time_remaining(reset, include_days)))
             card["reset_right"].configure(text=format_date_long(reset))
         else:
-            card["reset_left"].configure(text="Aucune limite active")
+            card["reset_left"].configure(text=I18n.t("no_limit"))
             card["reset_right"].configure(text="")
 
     @staticmethod

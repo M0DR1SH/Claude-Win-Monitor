@@ -1,0 +1,26 @@
+Product          : Claude Win Monitor
+Version          : 1.9.1
+Build            : 1.9.1.0
+Date de release  : 2026-03-28   /   Release date: 2026-03-28
+Auteur           : Laurent Gérard   /   Author: Laurent Gérard
+
+Installateur     : Claude-Win-Monitor-Setup.exe        (Inno Setup)
+Exécutable       : ClaudeWinMonitor.exe                (Nuitka standalone)
+Plateforme       : Windows 10 / 11                     (64 bits)
+
+Communauté       : https://www.skool.com/ia-mastery
+Profil 🅻🅶       : https://www.skool.com/@laurent-gerard-1911?g=ia-mastery
+Page Ko-Fi       : https://ko-fi.com/laurent_gerard
+
+────────────────────────────────────────────────────────────────────────────────
+
+Nouveautés v1.9.0 / What's new in v1.9.0
+──────────────────────────────────────────
+  FR  Interface multilingue : FR / EN / DE / IT / ES
+      Sélecteur de devise configurable (€, $, ou symbole libre)
+      Fichier de traductions externe translations.json
+
+  EN  Multilingual UI: FR / EN / DE / IT / ES
+      Configurable currency selector (€, $ or custom symbol)
+      External translations file translations.json
+
